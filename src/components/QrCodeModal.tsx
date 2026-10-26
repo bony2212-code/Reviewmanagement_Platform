@@ -10,7 +10,8 @@ import {
   getClientDaysLeft,
   getDaysUntilStart,
   formatDate,
-  formatDateRange
+  formatDateRange,
+  encodeClientData
 } from '../lib/data';
 
 interface QrCodeModalProps {
@@ -29,8 +30,8 @@ export default function QrCodeModal({ isOpen, client, onClose }: QrCodeModalProp
 
     if (typeof window !== 'undefined') {
       const base = window.location.origin;
-      // Permanent QR Code URL: based on permanent client ID so renewals never change the physical QR
-      const url = `${base}/review?id=${client.id}`;
+      // Complete QR Code URL with permanent ID and self-contained encoded payload
+      const url = `${base}/review?id=${encodeURIComponent(client.id)}&d=${encodeClientData(client)}`;
       setFunnelUrl(url);
 
       if (canvasRef.current) {

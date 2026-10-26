@@ -63,7 +63,7 @@ import ApplyLeadModal from '../../components/ApplyLeadModal';
 import SettingsModal from '../../components/SettingsModal';
 import Toast from '../../components/Toast';
 
-export default function SmartXAdminPortalPage() {
+export default function smartxcrmAdminPortalPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
 
@@ -111,6 +111,15 @@ export default function SmartXAdminPortalPage() {
     if (authStatus) {
       setClients(getStoredClients());
       setLeads(getStoredLeads());
+      fetch('/api/clients')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.success && Array.isArray(data.clients) && data.clients.length > 0) {
+            setClients(data.clients);
+            saveStoredClients(data.clients);
+          }
+        })
+        .catch(() => {});
     }
     setIsAuthChecking(false);
   }, []);
@@ -124,14 +133,14 @@ export default function SmartXAdminPortalPage() {
       setIsAuthenticated(true);
       setClients(getStoredClients());
       setLeads(getStoredLeads());
-      showToast('Welcome back to SmartX Admin!');
+      showToast('Welcome back to smartxcrm Admin!');
     } else {
       setLoginError('Invalid Login ID or Password. Please try again.');
     }
   };
 
   const handleLogout = () => {
-    if (confirm('Are you sure you want to log out of SmartX Admin?')) {
+    if (confirm('Are you sure you want to log out of smartxcrm Admin?')) {
       clearSessionAuth();
       setIsAuthenticated(false);
       showToast('Logged out successfully.', 'info');
@@ -221,14 +230,14 @@ export default function SmartXAdminPortalPage() {
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium">Verifying SmartX Portal...</span>
+          <span className="text-sm font-medium">Verifying smartxcrm Portal...</span>
         </div>
       </div>
     );
   }
 
   // ==========================================
-  // SECRET SMARTX_ADMIN LOGIN SCREEN
+  // SECRET smartxcrmcrm_admin LOGIN SCREEN
   // ==========================================
   if (!isAuthenticated) {
     return (
@@ -240,14 +249,14 @@ export default function SmartXAdminPortalPage() {
         <Toast message={toastMessage} type={toastType} onClose={() => setToastMessage('')} />
 
         <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl p-7 sm:p-9 backdrop-blur-xl relative z-10">
-          
+
           {/* Logo & Brand */}
           <div className="text-center mb-7">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-blue-600 text-white shadow-lg shadow-indigo-500/30 mb-3.5">
               <Star className="w-7 h-7 fill-white text-white" />
             </div>
             <div className="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest mb-2">
-              SmartX Admin Portal
+              smartxcrm Admin Portal
             </div>
             <h1 className="text-2xl font-black text-white tracking-tight">
               Review Growth Hub
@@ -324,7 +333,7 @@ export default function SmartXAdminPortalPage() {
               type="submit"
               className="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 active:scale-95 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Sign In to SmartX Admin</span>
+              <span>Sign In to smartxcrm Admin</span>
             </button>
           </form>
 
@@ -345,7 +354,7 @@ export default function SmartXAdminPortalPage() {
   }
 
   // ==========================================
-  // AUTHENTICATED SMARTX ADMIN DASHBOARD
+  // AUTHENTICATED smartxcrm ADMIN DASHBOARD
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
@@ -354,7 +363,7 @@ export default function SmartXAdminPortalPage() {
       {/* Top Navigation */}
       <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          
+
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-blue-600 text-white shadow-md shadow-indigo-500/25">
               <Star className="w-5 h-5 fill-white text-white" />
@@ -365,7 +374,7 @@ export default function SmartXAdminPortalPage() {
                   Review Growth Hub
                 </h1>
                 <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase tracking-wider">
-                  SmartX Admin
+                  smartxcrm Admin
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
@@ -387,11 +396,10 @@ export default function SmartXAdminPortalPage() {
 
             <button
               onClick={() => setShowLeadsView(!showLeadsView)}
-              className={`p-2.5 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border cursor-pointer ${
-                showLeadsView
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                  : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
-              }`}
+              className={`p-2.5 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border cursor-pointer ${showLeadsView
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
+                }`}
               title="View Inquiries & Leads"
             >
               <Inbox className="w-4 h-4 text-emerald-400" />
@@ -470,11 +478,10 @@ export default function SmartXAdminPortalPage() {
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-            <div className={`p-3 rounded-xl border ${
-              expiredCount > 0
-                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30 animate-pulse'
-                : 'bg-slate-800 text-slate-400 border-slate-700'
-            }`}>
+            <div className={`p-3 rounded-xl border ${expiredCount > 0
+              ? 'bg-rose-500/10 text-rose-400 border-rose-500/30 animate-pulse'
+              : 'bg-slate-800 text-slate-400 border-slate-700'
+              }`}>
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
@@ -555,7 +562,7 @@ export default function SmartXAdminPortalPage() {
 
         {/* Search & Category Filter Toolbar */}
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-          
+
           {/* Search bar */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
@@ -575,44 +582,40 @@ export default function SmartXAdminPortalPage() {
               <button
                 type="button"
                 onClick={() => setSelectedStatus('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  selectedStatus === 'all'
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${selectedStatus === 'all'
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'text-slate-400 hover:text-slate-200'
+                  }`}
               >
                 All ({clients.length})
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedStatus('active')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                  selectedStatus === 'active'
-                    ? 'bg-emerald-600 text-white shadow'
-                    : 'text-emerald-400/80 hover:text-emerald-300'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${selectedStatus === 'active'
+                  ? 'bg-emerald-600 text-white shadow'
+                  : 'text-emerald-400/80 hover:text-emerald-300'
+                  }`}
               >
                 <span>Active ({activeCount})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedStatus('upcoming')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                  selectedStatus === 'upcoming'
-                    ? 'bg-amber-600 text-white shadow'
-                    : 'text-amber-400/80 hover:text-amber-300'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${selectedStatus === 'upcoming'
+                  ? 'bg-amber-600 text-white shadow'
+                  : 'text-amber-400/80 hover:text-amber-300'
+                  }`}
               >
                 <span>Upcoming ({upcomingCount})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedStatus('expired')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                  selectedStatus === 'expired'
-                    ? 'bg-rose-600 text-white shadow'
-                    : 'text-rose-400/80 hover:text-rose-300'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${selectedStatus === 'expired'
+                  ? 'bg-rose-600 text-white shadow'
+                  : 'text-rose-400/80 hover:text-rose-300'
+                  }`}
               >
                 <span>Expired ({expiredCount})</span>
               </button>
@@ -669,7 +672,7 @@ export default function SmartXAdminPortalPage() {
                   className="bg-slate-900/90 border border-slate-800/90 hover:border-slate-700 rounded-3xl shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group hover:shadow-2xl hover:shadow-indigo-500/10"
                 >
                   <div className="p-5 sm:p-6 space-y-3.5">
-                    
+
                     {/* Header bar */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -781,7 +784,7 @@ export default function SmartXAdminPortalPage() {
 
                   {/* Card Action Toolbar */}
                   <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 grid grid-cols-4 gap-1.5">
-                    
+
                     {/* Live Funnel */}
                     <Link
                       href={`/review?id=${client.id}&d=${encoded}`}

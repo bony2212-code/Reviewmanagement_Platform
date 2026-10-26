@@ -25,6 +25,7 @@ import {
   pickReviewTemplates,
   renderReviewFromTemplate,
   formatGoogleReviewUrl,
+  formatWhatsAppPhone,
   decodeClientData,
   DEFAULT_CLIENTS,
   isClientExpired,
@@ -70,19 +71,28 @@ function ReviewFunnelContent() {
     const dParam = searchParams.get('d');
     const idParam = searchParams.get('id');
     const storedClients = getStoredClients();
-    let initialClient = DEFAULT_CLIENTS[0];
+    let initialClient: Client = DEFAULT_CLIENTS[0];
 
-    // 1. If 'id' is provided, check storedClients first (most up-to-date locally)
+    // 1. If dParam is provided in URL (scanned from Standee or QR code), decode immediately
+    if (dParam) {
+       const decoded = decodeClientData(dParam);
+       if (decoded && decoded.name) {
+         initialClient = decoded;
+         // Cache on the mobile device if not already present
+         if (decoded.id && !storedClients.some((c) => c.id === decoded.id)) {
+           try {
+             const updatedStored = [decoded, ...storedClients];
+             localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
+           } catch {}
+         }
+       }
+     }
+
+    // 2. If idParam is provided, check storedClients or default clients
     if (idParam) {
       const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
       if (match) initialClient = match;
-    } else if (dParam) {
-      const decoded = decodeClientData(dParam);
-      if (decoded) {
-        const storedMatch = decoded.id ? storedClients.find((c) => c.id === decoded.id) : null;
-        initialClient = storedMatch || decoded;
-      }
-    } else if (storedClients.length > 0) {
+    } else if (!dParam && storedClients.length > 0) {
       initialClient = storedClients[0];
     }
 
@@ -199,15 +209,12 @@ function ReviewFunnelContent() {
   };
 
   const handleSendToWhatsApp = () => {
-    let phone = client.phone ? client.phone.replace(/\D/g, '') : agencyPhone.replace(/\D/g, '');
-    if (phone.length === 10) {
-      phone = '91' + phone;
-    }
+    const targetPhone = formatWhatsAppPhone(client?.phone, agencyPhone);
     const cleanNote = selectedReviewText.trim() || 'No custom note provided';
 
     const whatsappMsg = `⭐ *CUSTOMER REVIEW & FEEDBACK - ${client.name.toUpperCase()}*\n\n⭐ *Rating Given:* ${rating} / 5 Stars\n📍 *City:* ${client.city}\n🏷️ *Service:* ${selectedProduct || 'General'}\n\n📝 *Review / Feedback:*\n"${cleanNote}"\n\n--------------------------------------------\n_Sent directly to your WhatsApp via Review Growth Hub_`;
 
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+    window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
 
     // Lock review for 24 hours across all devices
     if (client?.id && selectedReviewText) {
@@ -521,9 +528,9 @@ function ReviewFunnelContent() {
           </div>
         </div>
 
-        {/* Action Button: 4-5 Stars -> Google Review | 1-3 Stars -> Direct WhatsApp */}
+        {/* Action Button: 4-5 Stars -> Google Review & Direct WhatsApp | 1-3 Stars -> Direct WhatsApp */}
         {rating >= 4 ? (
-          <div className="space-y-4 pt-1">
+          <div className="space-y-3 pt-1">
             {/* Primary Action Button: 1-Tap Copy & Open Google (5★) */}
             <button
               type="button"
@@ -533,6 +540,22 @@ function ReviewFunnelContent() {
               <Copy className="w-5 h-5" />
               <span>{ui.copyBtn}</span>
               <ExternalLink className="w-4 h-4" />
+            </button>
+
+            {/* Also Send / Share Review Directly on WhatsApp to Business Owner */}
+            <button
+              type="button"
+              onClick={handleSendToWhatsApp}
+              className="w-full py-3.5 px-5 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/50 active:scale-95 text-emerald-300 hover:text-emerald-200 font-bold text-xs sm:text-sm border border-emerald-500/40 transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              <MessageSquare className="w-4 h-4 text-emerald-400" />
+              <span>
+                {lang === 'gu'
+                  ? `📲 WhatsApp પર પણ માલિકને મોકલો (+${formatWhatsAppPhone(client.phone, agencyPhone)})`
+                  : lang === 'hi'
+                  ? `📲 WhatsApp पर भी मालिक को भेजें (+${formatWhatsAppPhone(client.phone, agencyPhone)})`
+                  : `📲 Also Send on WhatsApp to Owner (+${formatWhatsAppPhone(client.phone, agencyPhone)})`}
+              </span>
             </button>
 
             {/* 3 Step Quick Instructions Box */}
@@ -570,14 +593,14 @@ function ReviewFunnelContent() {
             <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-center space-y-1 text-xs">
               <div className="flex items-center justify-center gap-1.5 font-bold text-emerald-400">
                 <MessageSquare className="w-4 h-4 shrink-0" />
-                <span>{ui.directWhatsAppNotice}: {client.name} (+{client.phone || agencyPhone})</span>
+                <span>{ui.directWhatsAppNotice}: {client.name} (+{formatWhatsAppPhone(client.phone, agencyPhone)})</span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
                 {lang === 'gu'
-                  ? `તમારો રિવ્યૂ અને કસ્ટમ નોટ સીધા ${client.name} ના WhatsApp નંબર પર મોકલવામાં આવશે.`
+                  ? `તમારો રિવ્યૂ અને કસ્ટમ નોટ સીધા ${client.name} ના WhatsApp નંબર (+${formatWhatsAppPhone(client.phone, agencyPhone)}) પર મોકલવામાં આવશે.`
                   : lang === 'hi'
-                  ? `आपका रिव्यू और कस्टम नोट सीधे ${client.name} के WhatsApp नंबर पर भेजा जाएगा।`
-                  : `Your review and custom note will be sent directly to ${client.name}'s WhatsApp.`}
+                  ? `आपका रिव्यू और कस्टम नोट सीधे ${client.name} के WhatsApp नंबर (+${formatWhatsAppPhone(client.phone, agencyPhone)}) पर भेजा जाएगा।`
+                  : `Your review and custom note will be sent directly to ${client.name}'s WhatsApp (+${formatWhatsAppPhone(client.phone, agencyPhone)}).`}
               </p>
             </div>
           </div>

@@ -7,7 +7,7 @@ const AUTH_SESSION_KEY = 'rgh_admin_session_v1';
 const DEFAULT_CLIENTS = [
   {
     id: 'client_1',
-    name: 'Apex Surgical & Hospital Equipment',
+    name: 'smartxcrmcrm Surgical & Hospital Equipment',
     person_name: 'Mr. Rajesh Shah (Director)',
     category: 'surgical_medical',
     city: 'Ahmedabad',
@@ -66,7 +66,7 @@ function getAdminCredentials() {
   if (stored) {
     try {
       return JSON.parse(stored);
-    } catch (e) {}
+    } catch (e) { }
   }
   return { username: 'admin', password: 'admin@123' };
 }
@@ -272,11 +272,10 @@ function renderKeywordChips(cat) {
     const isSelected = modalSelectedKeywords.has(prod);
     const chip = document.createElement('button');
     chip.type = 'button';
-    chip.className = `px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-      isSelected 
-        ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-500' 
-        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-    }`;
+    chip.className = `px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${isSelected
+      ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-500'
+      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+      }`;
     chip.innerHTML = `${isSelected ? '✓ ' : '+ '}${escapeHtml(prod)}`;
     chip.addEventListener('click', () => {
       if (modalSelectedKeywords.has(prod)) {
@@ -340,7 +339,7 @@ function renderClientGrid() {
   clients.forEach(client => {
     const funnelUrl = getFunnelUrl(client);
     const standeeUrl = getStandeeUrl(client);
-    
+
     const cat = INDUSTRY_CATALOG[client.category] || INDUSTRY_CATALOG.general;
     const catLabel = `${cat.icon} ${cat.name}`;
 
@@ -454,7 +453,7 @@ function shareOnWhatsApp(clientId) {
 
   const funnelUrl = getFunnelUrl(client);
   const text = `Hi! Please share your valuable experience with *${client.name}* on Google.\n\n👉 Tap here to rate us: ${funnelUrl}\n\n(It takes just 10 seconds and lets you choose English, Hindi, or Gujarati review drafts for your exact product/service!) ⭐⭐⭐⭐⭐`;
-  
+
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
@@ -754,7 +753,7 @@ function loadLeads() {
   if (stored) {
     try {
       clientLeads = JSON.parse(stored);
-    } catch(e) {
+    } catch (e) {
       clientLeads = [...DEFAULT_SAMPLE_LEADS];
     }
   } else {
@@ -795,7 +794,7 @@ function renderLeadsList() {
   clientLeads.forEach(lead => {
     const card = document.createElement('div');
     card.className = "p-4 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition flex flex-col md:flex-row md:items-center justify-between gap-3";
-    
+
     // WhatsApp URL for agency owner to chat with this lead
     const rawPhone = lead.phone ? lead.phone.replace(/[^0-9]/g, '') : '';
     const leadWhatsAppPhone = rawPhone.length === 10 ? `91${rawPhone}` : rawPhone;

@@ -20,16 +20,19 @@ function StandeeContent() {
     const storedClients = getStoredClients();
     let initialClient = DEFAULT_CLIENTS[0];
 
+    // 1. If dParam is provided in URL, decode immediately
+    if (dParam) {
+      const decoded = decodeClientData(dParam);
+      if (decoded && decoded.name) {
+        initialClient = decoded;
+      }
+    }
+
+    // 2. If idParam is provided, check storedClients
     if (idParam) {
       const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
       if (match) initialClient = match;
-    } else if (dParam) {
-      const decoded = decodeClientData(dParam);
-      if (decoded) {
-        const storedMatch = decoded.id ? storedClients.find((c) => c.id === decoded.id) : null;
-        initialClient = storedMatch || decoded;
-      }
-    } else if (storedClients.length > 0) {
+    } else if (!dParam && storedClients.length > 0) {
       initialClient = storedClients[0];
     }
 
@@ -44,7 +47,7 @@ function StandeeContent() {
             setClient(data.client);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [searchParams]);
 
@@ -52,8 +55,8 @@ function StandeeContent() {
     if (!client || typeof window === 'undefined') return;
 
     const base = window.location.origin;
-    // Permanent QR Code URL: using client.id guarantees printed standees never change upon plan renewals
-    const funnelUrl = client.id ? `${base}/review?id=${encodeURIComponent(client.id)}` : `${base}/review?d=${encodeClientData(client)}`;
+    // Guaranteed standalone QR Code URL with permanent ID and full decoded payload
+    const funnelUrl = `${base}/review?id=${encodeURIComponent(client.id)}&d=${encodeClientData(client)}`;
 
     if (canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, funnelUrl, {
@@ -70,11 +73,11 @@ function StandeeContent() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 text-slate-900">
-      
+
       {/* Top Action Bar (Hidden when printing) */}
       <div className="no-print max-w-sm w-full mb-4 flex items-center justify-between">
         <Link
-          href="/smartx_admin"
+          href="/smartxcrmcrm_admin"
           className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -96,7 +99,7 @@ function StandeeContent() {
 
       {/* Standee A5 Card Display */}
       <div className="standee-card max-w-sm w-full bg-white rounded-3xl p-8 border-4 border-slate-900 text-center shadow-2xl relative overflow-hidden">
-        
+
         {/* Top badge */}
         <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-900 text-white rounded-full text-xs font-extrabold tracking-wider uppercase mb-5">
           <span className="text-amber-400">★★★★★</span>

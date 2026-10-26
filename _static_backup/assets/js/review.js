@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fallback to explicit query params
   if (!clientData) {
     clientData = {
-      name: params.get('name') || "Apex Surgical & Mobility Store",
+      name: params.get('name') || "smartxcrmcrm Surgical & Mobility Store",
       city: params.get('city') || "Ahmedabad",
       category: params.get('category') || "surgical_medical",
       google_url: params.get('google_url') || "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
@@ -36,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const elStarRating = document.getElementById('star-rating');
   const elStars = elStarRating.querySelectorAll('.star-btn');
   const elRatingFeedback = document.getElementById('rating-feedback-text');
-  
+
   const elPositiveSection = document.getElementById('positive-section');
   const elNegativeSection = document.getElementById('negative-section');
-  
+
   const elLangBtns = document.querySelectorAll('.lang-btn');
   const elProductPrompt = document.getElementById('ui-select-product-prompt');
   const elProductContainer = document.getElementById('product-chips-container');
@@ -47,11 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const elCustomReview = document.getElementById('custom-review-input');
   const elRegenBtn = document.getElementById('btn-regenerate');
   const elCopyGoogleBtn = document.getElementById('btn-copy-google');
-  
+
   const elCopyModal = document.getElementById('copy-success-modal');
   const elCloseModalBtn = document.getElementById('btn-close-modal');
   const elDirectGoogleLink = document.getElementById('btn-direct-google-link');
-  
+
   // Negative section elements
   const elNegForm = document.getElementById('neg-feedback-form');
   const elNegSuccess = document.getElementById('neg-success-msg');
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clientData.keywords) {
       list = clientData.keywords.split(',').map(k => k.trim()).filter(Boolean);
     }
-    
+
     // If fewer than 2 keywords, supplement from Industry catalog
     const cat = clientData.category && INDUSTRY_CATALOG[clientData.category] ? INDUSTRY_CATALOG[clientData.category] : INDUSTRY_CATALOG.general;
     if (list.length === 0 && cat && cat.defaultProducts) {
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ? 'px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-600 text-white shadow-sm border border-indigo-600 transition-all flex items-center gap-1'
         : 'px-3 py-1.5 rounded-full text-xs font-medium bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 transition-all';
       chip.innerHTML = isActive ? `<span>✓</span> <span>${escapeHtml(prod)}</span>` : escapeHtml(prod);
-      
+
       chip.addEventListener('click', () => {
         selectedProduct = prod;
         renderProductChips();
@@ -128,11 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set initial language tab
   function updateLanguage(newLang) {
     currentLang = newLang;
-    
+
     // Update button states
     elLangBtns.forEach(btn => {
       const isSelected = btn.dataset.lang === newLang;
-      btn.className = isSelected 
+      btn.className = isSelected
         ? "lang-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm bg-indigo-600 text-white border-indigo-600"
         : "lang-btn px-4 py-2 rounded-xl text-sm font-medium transition-all bg-white text-gray-700 hover:bg-gray-100 border border-gray-200";
     });
@@ -172,16 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderReviews() {
     activeReviews = generateReviews(clientData, currentLang, selectedProduct);
     selectedReviewIndex = 0;
-    
+
     elReviewsList.innerHTML = '';
     activeReviews.forEach((reviewText, idx) => {
       const card = document.createElement('div');
-      card.className = `p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none text-left relative ${
-        idx === 0 
-          ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20 text-gray-900 shadow-sm' 
-          : 'border-gray-200 bg-white hover:border-indigo-300 text-gray-700'
-      }`;
-      
+      card.className = `p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none text-left relative ${idx === 0
+        ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20 text-gray-900 shadow-sm'
+        : 'border-gray-200 bg-white hover:border-indigo-300 text-gray-700'
+        }`;
+
       card.innerHTML = `
         <div class="flex items-start justify-between gap-2">
           <p class="leading-relaxed review-card-text">${escapeHtml(reviewText)}</p>
@@ -222,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Star Rating Handler
   function setRating(rating) {
     currentRating = rating;
-    
+
     // Update star visual styling
     elStars.forEach((star, idx) => {
       const starNum = idx + 1;
@@ -328,12 +327,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Construct WhatsApp message to client owner or doctor
     const rawPhone = clientData.phone ? clientData.phone.replace(/[^0-9]/g, '') : '';
     const ownerPhone = rawPhone.length === 10 ? `91${rawPhone}` : rawPhone;
-    
+
     const starIcons = '⭐'.repeat(currentRating);
     const doctorLabel = clientData.person_name ? `👨‍⚕️ *Doctor/Owner:* ${clientData.person_name}\n` : '';
 
     const complaintText = `⚠️ *PRIVATE CUSTOMER ALERT (BELOW 4★ FEEDBACK)*\n\n🏥 *Business:* ${clientData.name}\n${doctorLabel}📍 *City:* ${clientData.city || 'N/A'}\n⭐ *Rating Given:* ${currentRating}/5 Stars (${starIcons})\n\n👤 *Customer Name:* ${name}\n📞 *Customer Phone:* ${phone}\n\n📝 *Customer Complaint / Feedback:*\n"${message}"\n\n_Note: This feedback was NOT posted on Google. Please contact the customer immediately to resolve their issue._`;
-    
+
     if (ownerPhone) {
       const waUrl = `https://wa.me/${ownerPhone}?text=${encodeURIComponent(complaintText)}`;
       window.open(waUrl, '_blank');
@@ -342,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update Thank You card text with personalized doctor/owner mention
     const strings = UI_STRINGS[currentLang] || UI_STRINGS.en;
     const thankTarget = clientData.person_name ? clientData.person_name : (clientData.name || 'our management');
-    
+
     let thankDetailMsg = `Your feedback has been sent directly to ${thankTarget} on WhatsApp. We will reach out to you personally to make things right.`;
     if (currentLang === 'hi') {
       thankDetailMsg = `आपका संदेश सीधे ${thankTarget} को WhatsApp पर भेज दिया गया है। हम जल्द ही आपसे संपर्क करके समस्या का समाधान करेंगे।`;

@@ -926,10 +926,10 @@ export function generateNegativeFeedback(
 ): string[] {
   const catKey = (client.category && INDUSTRY_CATALOG[client.category]) ? client.category : 'general';
   const categoryInfo = INDUSTRY_CATALOG[catKey] || INDUSTRY_CATALOG.general;
-  
+
   const name = client.name || "Business";
   const city = client.city || "City";
-  
+
   let productWording = selectedProduct;
   if (!productWording) {
     const rawKeywords = client.keywords ? client.keywords.split(',').map(k => k.trim()).filter(Boolean) : [];
@@ -942,7 +942,7 @@ export function generateNegativeFeedback(
 
   const templates = NEGATIVE_FEEDBACK_STRUCTURES[lang] || NEGATIVE_FEEDBACK_STRUCTURES.en;
   const shuffled = [...templates].sort(() => 0.5 - Math.random());
-  
+
   return shuffled.slice(0, 3).map(template => {
     let text = template
       .replace(/{name}/g, name)
@@ -957,17 +957,17 @@ export function generateNegativeFeedback(
 
 export function formatGoogleReviewUrl(inputUrlOrPlaceId: string): string {
   if (!inputUrlOrPlaceId) return "https://search.google.com";
-  
+
   const cleanInput = inputUrlOrPlaceId.trim();
-  
+
   if (/^ChIJ[A-Za-z0-9_-]+$/.test(cleanInput)) {
     return `https://search.google.com/local/writereview?placeid=${cleanInput}`;
   }
-  
+
   if (cleanInput.includes("placeid=")) {
     return cleanInput;
   }
-  
+
   if (cleanInput.includes("/review") || cleanInput.includes("writereview")) {
     return cleanInput;
   }
@@ -977,6 +977,23 @@ export function formatGoogleReviewUrl(inputUrlOrPlaceId: string): string {
   }
 
   return cleanInput;
+}
+
+export function formatWhatsAppPhone(phone?: string, fallback: string = '919876543210'): string {
+  if (!phone || !phone.trim()) {
+    return fallback.replace(/\D/g, '') || '919876543210';
+  }
+  let cleaned = phone.trim().replace(/\D/g, '');
+  if (cleaned.startsWith('00')) {
+    cleaned = cleaned.substring(2);
+  } else if (cleaned.startsWith('0') && cleaned.length === 11) {
+    cleaned = cleaned.substring(1);
+  }
+  // Standard 10-digit mobile number in India: prefix with 91
+  if (cleaned.length === 10) {
+    cleaned = '91' + cleaned;
+  }
+  return cleaned || fallback.replace(/\D/g, '') || '919876543210';
 }
 
 export function encodeClientData(client: Partial<Client>): string {
@@ -1104,7 +1121,7 @@ export function getDefaultExpiryDate(monthsToAdd: number = 3): string {
 export const DEFAULT_CLIENTS: Client[] = [
   {
     id: 'client_1',
-    name: 'Apex Surgical & Hospital Equipment',
+    name: 'smartxcrmcrm Surgical & Hospital Equipment',
     person_name: 'Mr. Rajesh Shah (Director)',
     category: 'surgical_medical',
     city: 'Ahmedabad',

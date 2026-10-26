@@ -6,6 +6,7 @@ import { Client, IndustryKey, LanguageCode } from '../lib/types';
 import {
   INDUSTRY_CATALOG,
   formatGoogleReviewUrl,
+  formatWhatsAppPhone,
   getDefaultExpiryDate,
   getClientDaysLeft,
   getDaysUntilStart,
@@ -101,6 +102,8 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
 
     const formattedGoogle = formatGoogleReviewUrl(googleUrl);
 
+    const formattedPhone = formatWhatsAppPhone(phone.trim(), '919876543210');
+
     const clientToSave: Client = {
       id: client?.id || `client_${Date.now()}`,
       name: name.trim(),
@@ -108,7 +111,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
       category,
       city: city.trim(),
       google_url: formattedGoogle,
-      phone: phone.trim().replace(/\D/g, ''),
+      phone: formattedPhone,
       keywords: keywords.trim(),
       default_lang: defaultLang,
       createdAt: client?.createdAt || new Date().toISOString(),
@@ -124,7 +127,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 my-8 text-slate-100 max-h-[90vh] overflow-y-auto">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
           <div>
@@ -145,7 +148,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          
+
           {/* Business Name & Person */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -159,7 +162,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Apex Hospital & Healthcare"
+                  placeholder="e.g. smartxcrmcrm Hospital & Healthcare"
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
@@ -246,7 +249,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Owner WhatsApp (Negative Review Alert) <span className="text-rose-400">*</span>
+                Owner WhatsApp / Chat Number <span className="text-rose-400">*</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
@@ -255,12 +258,12 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="e.g. 919876543210 (with country code)"
+                  placeholder="e.g. 9825012345 or +91 98250 12345"
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Dissatisfied 1-3★ ratings will be routed privately to this number.
+              <p className="text-[11px] text-slate-400 mt-1">
+                WhatsApp chat opens directly to this number when customers share or send reviews/feedback.
               </p>
             </div>
 
@@ -435,7 +438,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
               </label>
               <span className="text-[11px] text-slate-400">Comma-separated</span>
             </div>
-            
+
             <input
               type="text"
               value={keywords}
@@ -458,11 +461,10 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
                         type="button"
                         key={prod}
                         onClick={() => toggleKeyword(prod)}
-                        className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium ${
-                          isSelected
-                            ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
-                            : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
-                        }`}
+                        className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium ${isSelected
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
+                          : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                          }`}
                       >
                         {isSelected ? '✓ ' : '+ '}{prod}
                       </button>

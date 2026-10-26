@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, MessageSquare, Copy, Check, Send } from 'lucide-react';
 import { Client } from '../lib/types';
-import { encodeClientData } from '../lib/data';
+import { encodeClientData, formatWhatsAppPhone } from '../lib/data';
 import { getAgencyContactNumber } from '../lib/storage';
 
 interface WhatsAppModalProps {
@@ -33,10 +33,11 @@ export default function WhatsAppModal({ isOpen, client, onClose }: WhatsAppModal
   if (!isOpen || !client) return null;
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const funnelUrl = `${origin}/review?d=${encodeClientData(client)}`;
-  const standeeUrl = `${origin}/standee?d=${encodeClientData(client)}`;
+  const funnelUrl = `${origin}/review?id=${encodeURIComponent(client.id)}&d=${encodeClientData(client)}`;
+  const standeeUrl = `${origin}/standee?id=${encodeURIComponent(client.id)}&d=${encodeClientData(client)}`;
+  const targetPhone = formatWhatsAppPhone(client.phone, agencyPhone);
 
-  const messageText = `⭐ *5-STAR GOOGLE REVIEW FUNNEL IS READY!*\n\nHello *${client.name}* team! 👋\n\nYour customized multilingual Google Review funnel is now live. Customers can now submit 5-star authentic reviews in English, हिन्दी, or ગુજરાતી in under 10 seconds:\n\n🔗 *Customer Review Link:* ${funnelUrl}\n🖨️ *Table Tent / Counter Standee:* ${standeeUrl}\n\n🛡️ *Negative Review Protection Active:* Any 1-3 star rating will be safely sent directly to your WhatsApp (${client.phone}) without touching your Google rating!\n\n📞 *Agency Support & Renewals:* +${agencyPhone.replace(/\D/g, '')}\n\n_Generated via Review Growth Hub_`;
+  const messageText = `⭐ *5-STAR GOOGLE REVIEW FUNNEL IS READY!*\n\nHello *${client.name}* team! 👋\n\nYour customized multilingual Google Review funnel is now live. Customers can now submit 5-star authentic reviews in English, हिन्दी, or ગુજરાતી in under 10 seconds:\n\n🔗 *Customer Review Link:* ${funnelUrl}\n🖨️ *Table Tent / Counter Standee:* ${standeeUrl}\n\n🛡️ *Negative Review Protection Active:* Any 1-3 star rating will be safely sent directly to your WhatsApp (+${targetPhone}) without touching your Google rating!\n\n📞 *Agency Support & Renewals:* +${agencyPhone.replace(/\D/g, '')}\n\n_Generated via Review Growth Hub_`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(messageText);
@@ -45,8 +46,7 @@ export default function WhatsAppModal({ isOpen, client, onClose }: WhatsAppModal
   };
 
   const handleOpenWhatsApp = () => {
-    const phone = client.phone ? client.phone.replace(/\D/g, '') : '';
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(messageText)}`;
+    const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(messageText)}`;
     window.open(url, '_blank');
   };
 

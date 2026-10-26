@@ -49,7 +49,7 @@ export default function PublicLandingPage() {
   React.useEffect(() => {
     const revs = generateReviews(
       {
-        name: 'Apex Care Hospital',
+        name: 'smartxcrmcrm Care Hospital',
         person_name: 'Dr. Rajesh Shah',
         category: demoCategory,
         city: 'Ahmedabad',
@@ -89,14 +89,14 @@ export default function PublicLandingPage() {
       <div className="bg-gradient-to-r from-indigo-900 via-indigo-700 to-blue-800 text-white text-xs font-semibold py-2 px-4 text-center border-b border-indigo-500/20">
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-          <span>Next-Gen SmartX 5-Star Review Engine • Supports English, हिन्दी & ગુજરાતી with Permanent QR Codes</span>
+          <span>Next-Gen smartxcrm 5-Star Review Engine • Supports English, हिन्दी & ગુજરાતી with Permanent QR Codes</span>
         </span>
       </div>
 
       {/* Navigation Header */}
       <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          
+
           <Link href="/" className="flex items-center gap-3 group">
             <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition">
               <Star className="w-5 h-5 fill-white text-white" />
@@ -107,7 +107,7 @@ export default function PublicLandingPage() {
                   Review Growth Hub
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest hidden sm:inline-block">
-                  SmartX
+                  smartxcrm
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
@@ -143,7 +143,7 @@ export default function PublicLandingPage() {
         <div className="absolute top-40 right-10 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-          
+
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 text-indigo-300 text-xs font-bold shadow-xl">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
             <span>Proven 320% Increase in 5-Star Google Reviews</span>
@@ -231,7 +231,7 @@ export default function PublicLandingPage() {
       {/* ============================================================== */}
       <section id="demo" className="py-16 px-4 sm:px-6 bg-slate-900/60 border-y border-slate-800/80 relative">
         <div className="max-w-5xl mx-auto space-y-8">
-          
+
           <div className="text-center space-y-2">
             <span className="text-xs font-extrabold text-indigo-400 uppercase tracking-widest">
               Interactive Live Experience
@@ -246,7 +246,7 @@ export default function PublicLandingPage() {
 
           {/* Interactive Simulator Shell */}
           <div className="max-w-2xl mx-auto bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 relative overflow-hidden">
-            
+
             {/* Top Simulator Header */}
             <div className="flex flex-wrap items-center justify-between pb-4 border-b border-slate-800 gap-3">
               <div className="flex items-center gap-2.5">
@@ -254,7 +254,7 @@ export default function PublicLandingPage() {
                   🏥
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white">Apex Care Hospital & Multi-Speciality</h3>
+                  <h3 className="text-base font-extrabold text-white">smartxcrmcrm Care Hospital & Multi-Speciality</h3>
                   <p className="text-[11px] text-slate-400">Dr. Rajesh Shah • Ahmedabad</p>
                 </div>
               </div>
@@ -289,11 +289,10 @@ export default function PublicLandingPage() {
                     className="p-1 transition-transform active:scale-90 hover:scale-110 cursor-pointer"
                   >
                     <Star
-                      className={`w-9 h-9 sm:w-11 sm:h-11 transition-colors ${
-                        demoRating >= star
-                          ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]'
-                          : 'text-slate-700 fill-slate-800 hover:text-slate-500'
-                      }`}
+                      className={`w-9 h-9 sm:w-11 sm:h-11 transition-colors ${demoRating >= star
+                        ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]'
+                        : 'text-slate-700 fill-slate-800 hover:text-slate-500'
+                        }`}
                     />
                   </button>
                 ))}
@@ -306,7 +305,7 @@ export default function PublicLandingPage() {
             {/* Conditional Flow based on rating */}
             {demoRating >= 4 ? (
               <div className="space-y-4 animate-fade-in">
-                
+
                 {/* Language Switcher Tabs */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
@@ -323,11 +322,10 @@ export default function PublicLandingPage() {
                         key={item.code}
                         type="button"
                         onClick={() => setDemoLang(item.code as LanguageCode)}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition cursor-pointer ${
-                          demoLang === item.code
-                            ? 'bg-gradient-to-r from-indigo-500 to-blue-600 border-indigo-400 text-white shadow-md'
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                        }`}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition cursor-pointer ${demoLang === item.code
+                          ? 'bg-gradient-to-r from-indigo-500 to-blue-600 border-indigo-400 text-white shadow-md'
+                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
                       >
                         {item.label}
                       </button>
@@ -346,11 +344,10 @@ export default function PublicLandingPage() {
                       <button
                         type="button"
                         onClick={() => setDemoSelectedProduct(null)}
-                        className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium cursor-pointer transition ${
-                          demoSelectedProduct === null
-                            ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                        }`}
+                        className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium cursor-pointer transition ${demoSelectedProduct === null
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
+                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
                       >
                         All Services
                       </button>
@@ -359,11 +356,10 @@ export default function PublicLandingPage() {
                           key={p}
                           type="button"
                           onClick={() => setDemoSelectedProduct(p)}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium cursor-pointer transition ${
-                            demoSelectedProduct === p
-                              ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium cursor-pointer transition ${demoSelectedProduct === p
+                            ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                            }`}
                         >
                           {p}
                         </button>
@@ -428,7 +424,7 @@ export default function PublicLandingPage() {
       {/* ============================================================== */}
       <section id="how-it-works" className="py-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto space-y-12">
-          
+
           <div className="text-center space-y-3">
             <span className="text-xs font-extrabold text-indigo-400 uppercase tracking-widest">
               Simple & High-Converting
@@ -442,7 +438,7 @@ export default function PublicLandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
+
             {/* Step 1 */}
             <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-4 hover:border-slate-700 transition">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-black text-lg">
@@ -486,7 +482,7 @@ export default function PublicLandingPage() {
       {/* ============================================================== */}
       <section id="standee" className="py-16 px-4 sm:px-6 bg-slate-900/40 border-y border-slate-800/80">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          
+
           <div className="space-y-5">
             <span className="text-xs font-extrabold text-indigo-400 uppercase tracking-widest">
               Premium Hardware Integration
@@ -530,7 +526,7 @@ export default function PublicLandingPage() {
                 <span>Google Reviews</span>
               </div>
 
-              <h4 className="text-xl font-black text-slate-900">Apex Care Hospital</h4>
+              <h4 className="text-xl font-black text-slate-900">smartxcrmcrm Care Hospital</h4>
               <p className="text-xs font-semibold text-slate-600">Dr. Rajesh Shah • Ahmedabad</p>
 
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -564,7 +560,7 @@ export default function PublicLandingPage() {
       {/* ============================================================== */}
       <section className="py-20 px-4 sm:px-6 text-center relative overflow-hidden">
         <div className="max-w-3xl mx-auto space-y-6 relative z-10">
-          
+
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             Ready to 10x Your Local Google Reviews?
           </h2>
@@ -589,7 +585,7 @@ export default function PublicLandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 fill-indigo-400 text-indigo-400" />
-            <span className="font-bold text-white">Review Growth Hub (SmartX)</span>
+            <span className="font-bold text-white">Review Growth Hub (smartxcrm)</span>
             <span>• © 2026 All rights reserved.</span>
           </div>
 
