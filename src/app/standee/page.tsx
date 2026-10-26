@@ -77,7 +77,7 @@ function StandeeContent() {
       {/* Top Action Bar (Hidden when printing) */}
       <div className="no-print max-w-sm w-full mb-4 flex items-center justify-between">
         <Link
-          href="/smartxcrmcrm_admin"
+          href="/smartxcrm_admin"
           className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
         >
           <ArrowLeft className="w-4 h-4" />
