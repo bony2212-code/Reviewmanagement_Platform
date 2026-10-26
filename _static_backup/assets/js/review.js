@@ -4,11 +4,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   let clientData = null;
 
-  if (params.get('d')) {
+  if (params.get('name') || params.get('phone') || params.get('n') || params.get('p')) {
+    clientData = {
+      id: params.get('id') || "client_scanned",
+      name: params.get('name') || params.get('n') || "Our Business",
+      person_name: params.get('person_name') || params.get('pn') || "",
+      city: params.get('city') || params.get('c') || "Ahmedabad",
+      category: params.get('category') || params.get('cat') || "healthcare",
+      google_url: params.get('google_url') || params.get('g') || "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
+      phone: params.get('phone') || params.get('p') || "919876543210",
+      keywords: params.get('keywords') || params.get('k') || "",
+      default_lang: params.get('lang') || params.get('l') || "gu"
+    };
+  } else if (params.get('d')) {
     clientData = decodeClientData(params.get('d'));
   }
 
-  // Fallback to explicit query params
+  // Fallback to defaults
   if (!clientData) {
     clientData = {
       name: params.get('name') || "SmartXCRM Surgical & Mobility Store",
@@ -317,6 +329,27 @@ document.addEventListener('DOMContentLoaded', () => {
     elCopyModal.classList.add('hidden');
   });
 
+  // Direct WhatsApp Button for 4-5 Stars Review
+  const elSendWaPositive = document.getElementById('btn-send-whatsapp-positive');
+  if (elSendWaPositive) {
+    elSendWaPositive.addEventListener('click', () => {
+      const textToSend = elCustomReview.value.trim() || activeReviews[selectedReviewIndex] || "Great service!";
+      let ownerPhone = clientData.phone ? clientData.phone.replace(/[^0-9]/g, '') : '';
+      if (ownerPhone.startsWith('00')) ownerPhone = ownerPhone.substring(2);
+      else if (ownerPhone.startsWith('0') && ownerPhone.length === 11) ownerPhone = ownerPhone.substring(1);
+      if (ownerPhone.length === 10) ownerPhone = '91' + ownerPhone;
+
+      const starIcons = '⭐'.repeat(currentRating);
+      const msg = `⭐ *CUSTOMER REVIEW & FEEDBACK - ${clientData.name.toUpperCase()}*\n\n⭐ *Rating Given:* ${currentRating}/5 Stars (${starIcons})\n📍 *City:* ${clientData.city || 'N/A'}\n🏷️ *Service:* ${selectedProduct || 'General'}\n\n📝 *Review Draft:*\n"${textToSend}"\n\n--------------------------------------------\n_Sent directly on WhatsApp via Review Growth Hub_`;
+
+      if (ownerPhone) {
+        window.open(`https://wa.me/${ownerPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+      } else {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+      }
+    });
+  }
+
   // Negative Feedback Form Submission (WhatsApp / Direct message to owner/doctor)
   elNegForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -325,8 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = document.getElementById('neg-message').value.trim();
 
     // Construct WhatsApp message to client owner or doctor
-    const rawPhone = clientData.phone ? clientData.phone.replace(/[^0-9]/g, '') : '';
-    const ownerPhone = rawPhone.length === 10 ? `91${rawPhone}` : rawPhone;
+    let ownerPhone = clientData.phone ? clientData.phone.replace(/[^0-9]/g, '') : '';
+    if (ownerPhone.startsWith('00')) ownerPhone = ownerPhone.substring(2);
+    else if (ownerPhone.startsWith('0') && ownerPhone.length === 11) ownerPhone = ownerPhone.substring(1);
+    if (ownerPhone.length === 10) ownerPhone = '91' + ownerPhone;
 
     const starIcons = '⭐'.repeat(currentRating);
     const doctorLabel = clientData.person_name ? `👨‍⚕️ *Doctor/Owner:* ${clientData.person_name}\n` : '';

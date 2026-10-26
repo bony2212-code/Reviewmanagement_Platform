@@ -6,7 +6,13 @@ import Link from 'next/link';
 import QRCode from 'qrcode';
 import { Printer, ArrowLeft, Star, Camera } from 'lucide-react';
 import { Client } from '../../lib/types';
-import { decodeClientData, DEFAULT_CLIENTS, encodeClientData, formatDateRange } from '../../lib/data';
+import {
+  decodeClientData,
+  DEFAULT_CLIENTS,
+  buildClientReviewUrl,
+  formatWhatsAppPhone,
+  formatDateRange
+} from '../../lib/data';
 import { getStoredClients } from '../../lib/storage';
 
 function StandeeContent() {
@@ -17,22 +23,47 @@ function StandeeContent() {
   useEffect(() => {
     const dParam = searchParams.get('d');
     const idParam = searchParams.get('id');
+    const nameParam = searchParams.get('name') || searchParams.get('n');
+    const phoneParam = searchParams.get('phone') || searchParams.get('p');
+    const cityParam = searchParams.get('city') || searchParams.get('c');
+    const catParam = searchParams.get('cat') || searchParams.get('category');
+    const pnParam = searchParams.get('pn') || searchParams.get('person_name');
+    const langParam = searchParams.get('lang') || searchParams.get('l');
+    const gParam = searchParams.get('g') || searchParams.get('google_url');
+    const kParam = searchParams.get('k') || searchParams.get('keywords');
+    const sdParam = searchParams.get('sd') || searchParams.get('start_date');
+    const edParam = searchParams.get('ed') || searchParams.get('expiry_date');
+
     const storedClients = getStoredClients();
     let initialClient = DEFAULT_CLIENTS[0];
 
-    // 1. If dParam is provided in URL, decode immediately
-    if (dParam) {
+    // 1. Direct query parameters (from admin share/test link)
+    if (nameParam || phoneParam) {
+      initialClient = {
+        id: idParam || `standee_${Date.now()}`,
+        name: nameParam || initialClient.name,
+        phone: formatWhatsAppPhone(phoneParam || ''),
+        city: cityParam || '',
+        category: (catParam as any) || 'healthcare',
+        person_name: pnParam || undefined,
+        google_url: gParam || 'https://search.google.com',
+        default_lang: (langParam as any) || 'gu',
+        keywords: kParam || '',
+        start_date: sdParam || undefined,
+        expiry_date: edParam || undefined,
+        createdAt: new Date().toISOString(),
+      };
+    } else if (dParam) {
+      // 2. If dParam is provided in URL, decode immediately
       const decoded = decodeClientData(dParam);
       if (decoded && decoded.name) {
         initialClient = decoded;
       }
-    }
-
-    // 2. If idParam is provided, check storedClients
-    if (idParam) {
+    } else if (idParam) {
+      // 3. If idParam is provided, check storedClients
       const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
       if (match) initialClient = match;
-    } else if (!dParam && storedClients.length > 0) {
+    } else if (storedClients.length > 0) {
       initialClient = storedClients[0];
     }
 
@@ -44,10 +75,25 @@ function StandeeContent() {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success && data.client) {
-            setClient(data.client);
+            setClient((prev) => {
+              if (nameParam || phoneParam) {
+                return {
+                  ...data.client,
+                  name: nameParam || prev.name,
+                  phone: phoneParam ? formatWhatsAppPhone(phoneParam) : prev.phone,
+                  city: cityParam || prev.city || data.client.city,
+                  category: (catParam as any) || prev.category || data.client.category,
+                  person_name: pnParam || prev.person_name || data.client.person_name,
+                  keywords: kParam || prev.keywords || data.client.keywords,
+                  google_url: gParam || prev.google_url || data.client.google_url,
+                  default_lang: (langParam as any) || prev.default_lang || data.client.default_lang,
+                };
+              }
+              return data.client;
+            });
           }
         })
-        .catch(() => { });
+        .catch(() => {});
     }
   }, [searchParams]);
 
@@ -55,19 +101,38 @@ function StandeeContent() {
     if (!client || typeof window === 'undefined') return;
 
     const base = window.location.origin;
-    // Clean permanent QR Code URL (crisp, large modules, instantly scannable by phone camera)
-    const funnelUrl = `${base}/review?id=${encodeURIComponent(client.id)}`;
 
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, funnelUrl, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#020617',
-          light: '#ffffff',
-        },
-        errorCorrectionLevel: 'M',
-      });
+    const renderQrWithBase = (targetBase: string) => {
+      const funnelUrl = buildClientReviewUrl(targetBase, client);
+      if (canvasRef.current) {
+        QRCode.toCanvas(canvasRef.current, funnelUrl, {
+          width: 200,
+          margin: 2,
+          color: {
+            dark: '#020617',
+            light: '#ffffff',
+          },
+          errorCorrectionLevel: 'M',
+        });
+      }
+    };
+
+    // If on localhost, attempt to use network IP for phone camera scannability
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      fetch('/api/host-info')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.success && data.networkOrigin) {
+            renderQrWithBase(data.networkOrigin);
+          } else {
+            renderQrWithBase(base);
+          }
+        })
+        .catch(() => {
+          renderQrWithBase(base);
+        });
+    } else {
+      renderQrWithBase(base);
     }
   }, [client]);
 

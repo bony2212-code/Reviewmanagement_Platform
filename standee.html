@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table Standee / Counter Display - Review Growth Hub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+Gujarati:wght@600;700&family=Noto+Sans+Devanagari:wght@600;700&display=swap"
+    rel="stylesheet">
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Devanagari', 'Noto Sans Gujarati', sans-serif;
+    }
+
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .standee-card {
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+  <!-- Action Bar (Hidden on print) -->
+  <div class="no-print max-w-sm w-full mb-4 flex items-center justify-between">
+    <a href="index.html" class="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1">
+      ← Back to Dashboard
+    </a>
+    <button onclick="window.print()"
+      class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1.5">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+        </path>
+      </svg>
+      <span>Print / Save PDF (Ctrl+P)</span>
+    </button>
+  </div>
+
+  <!-- Standee A5 Card Display -->
+  <div
+    class="standee-card max-w-sm w-full bg-white rounded-3xl p-8 border-4 border-slate-900 text-center shadow-2xl relative overflow-hidden">
+
+    <!-- Decorative top badge -->
+    <div
+      class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-white rounded-full text-xs font-bold tracking-wider uppercase mb-5">
+      <span>★★★★★</span>
+      <span>Google Reviews</span>
+    </div>
+
+    <!-- Business Header -->
+    <h1 id="standee-biz-name" class="text-2xl font-black text-slate-900 tracking-tight leading-snug mb-1">
+      Business Name
+    </h1>
+    <p id="standee-biz-person" class="text-xs font-semibold text-slate-700 mb-1 hidden"></p>
+    <p id="standee-biz-city" class="text-xs font-bold text-indigo-700 tracking-wide uppercase mb-6">
+      📍 Ahmedabad
+    </p>
+
+    <!-- Call to action in 3 languages -->
+    <div class="space-y-1 mb-5">
+      <h2 class="text-lg font-extrabold text-slate-800 leading-tight">
+        Loved your experience with us?
+      </h2>
+      <p class="text-sm font-semibold text-slate-600">
+        તમારો અનુભવ કેવો રહ્યો? રિવ્યૂ આપો!
+      </p>
+      <p class="text-xs font-semibold text-slate-500">
+        अपना अनुभव शेयर करें और 5-स्टार रेटिंग दें!
+      </p>
+    </div>
+
+    <!-- QR Code Centerpiece -->
+    <div class="inline-block p-4 rounded-3xl border-2 border-slate-900 bg-white shadow-md mb-5">
+      <div id="standee-qrcode" class="flex items-center justify-center"></div>
+    </div>
+
+    <!-- Quick instructions -->
+    <div
+      class="bg-slate-50 border border-slate-200 rounded-2xl p-3 mb-4 text-xs font-semibold text-slate-700 space-y-1">
+      <div class="flex items-center justify-center gap-1.5 text-indigo-600 font-bold">
+        <span>📸</span>
+        <span>Scan with Phone Camera</span>
+      </div>
+      <div class="text-[11px] text-slate-500">
+        Choose Language: 🇬🇧 English • 🇮🇳 हिन्दी • 🇮🇳 ગુજરાતી
+      </div>
+    </div>
+
+    <!-- 5 Star rating icons row -->
+    <div class="flex items-center justify-center gap-1 text-amber-400 mb-2">
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    </div>
+
+    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+      1-Tap Instant Review • Takes 10 Seconds
+    </p>
+
+  </div>
+
+  <script src="assets/js/data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      let client = null;
+      if (params.get('d')) {
+        client = decodeClientData(params.get('d'));
+      }
+      if (!client) {
+        client = {
+          id: params.get('id') || "client_standee",
+          name: params.get('name') || "SmartXCRM Dental & Wellness Care",
+          phone: params.get('phone') || "919876543210",
+          city: params.get('city') || "Ahmedabad",
+          category: params.get('category') || params.get('cat') || "healthcare",
+          person_name: params.get('person_name') || params.get('pn') || "",
+          keywords: params.get('keywords') || params.get('k') || "",
+          google_url: params.get('google_url') || params.get('g') || "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"
+        };
+      }
+
+      document.getElementById('standee-biz-name').textContent = client.name;
+      if (client.person_name) {
+        const elPerson = document.getElementById('standee-biz-person');
+        elPerson.textContent = (client.category === 'healthcare' || /dr\b|doctor/i.test(client.person_name) ? '👨‍⚕️ ' : '👤 ') + client.person_name;
+        elPerson.classList.remove('hidden');
+      }
+      document.getElementById('standee-biz-city').textContent = client.city ? `📍 ${client.city}` : '';
+
+      // Review URL
+      const base = window.location.origin + window.location.pathname.replace('standee.html', '').replace(/\/$/, '') + '/review.html';
+      const p = new URLSearchParams();
+      if (client.id) p.set('id', client.id);
+      if (client.name) p.set('name', client.name);
+      if (client.phone) p.set('phone', client.phone);
+      if (client.city) p.set('city', client.city);
+      if (client.category) p.set('category', client.category);
+      if (client.person_name) p.set('person_name', client.person_name);
+      if (client.google_url) p.set('google_url', client.google_url);
+      if (client.keywords) p.set('keywords', client.keywords);
+      const funnelUrl = `${base}?${p.toString()}`;
+
+      // Generate QR
+      new QRCode(document.getElementById('standee-qrcode'), {
+        text: funnelUrl,
+        width: 170,
+        height: 170,
+        colorDark: "#020617",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    });
+  </script>
+</body>
+
+</html>

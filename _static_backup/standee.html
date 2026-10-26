@@ -148,9 +148,14 @@
       }
       if (!client) {
         client = {
+          id: params.get('id') || "client_standee",
           name: params.get('name') || "SmartXCRM Dental & Wellness Care",
+          phone: params.get('phone') || "919876543210",
           city: params.get('city') || "Ahmedabad",
-          google_url: params.get('google_url') || "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"
+          category: params.get('category') || params.get('cat') || "healthcare",
+          person_name: params.get('person_name') || params.get('pn') || "",
+          keywords: params.get('keywords') || params.get('k') || "",
+          google_url: params.get('google_url') || params.get('g') || "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"
         };
       }
 
@@ -164,7 +169,16 @@
 
       // Review URL
       const base = window.location.origin + window.location.pathname.replace('standee.html', '').replace(/\/$/, '') + '/review.html';
-      const funnelUrl = `${base}?d=${encodeClientData(client)}`;
+      const p = new URLSearchParams();
+      if (client.id) p.set('id', client.id);
+      if (client.name) p.set('name', client.name);
+      if (client.phone) p.set('phone', client.phone);
+      if (client.city) p.set('city', client.city);
+      if (client.category) p.set('category', client.category);
+      if (client.person_name) p.set('person_name', client.person_name);
+      if (client.google_url) p.set('google_url', client.google_url);
+      if (client.keywords) p.set('keywords', client.keywords);
+      const funnelUrl = `${base}?${p.toString()}`;
 
       // Generate QR
       new QRCode(document.getElementById('standee-qrcode'), {
@@ -173,7 +187,7 @@
         height: 170,
         colorDark: "#020617",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.M
       });
     });
   </script>

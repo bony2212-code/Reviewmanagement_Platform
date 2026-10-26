@@ -17,7 +17,7 @@ import {
   Clock,
   MessageSquare
 } from 'lucide-react';
-import { Client, LanguageCode } from '../../lib/types';
+import { Client, LanguageCode, IndustryKey } from '../../lib/types';
 import {
   INDUSTRY_CATALOG,
   UI_STRINGS,
@@ -70,29 +70,55 @@ function ReviewFunnelContent() {
   useEffect(() => {
     const dParam = searchParams.get('d');
     const idParam = searchParams.get('id');
+    const nameParam = searchParams.get('name') || searchParams.get('n');
+    const phoneParam = searchParams.get('phone') || searchParams.get('p');
+    const cityParam = searchParams.get('city') || searchParams.get('c');
+    const catParam = searchParams.get('cat') || searchParams.get('category');
+    const pnParam = searchParams.get('pn') || searchParams.get('person_name');
+    const langParam = searchParams.get('lang') || searchParams.get('l');
+    const gParam = searchParams.get('g') || searchParams.get('google_url');
+    const kParam = searchParams.get('k') || searchParams.get('keywords');
+
+    const sdParam = searchParams.get('sd') || searchParams.get('start_date');
+    const edParam = searchParams.get('ed') || searchParams.get('expiry_date');
+
     const storedClients = getStoredClients();
     let initialClient: Client = DEFAULT_CLIENTS[0];
 
-    // 1. If dParam is provided in URL (scanned from Standee or QR code), decode immediately
-    if (dParam) {
-       const decoded = decodeClientData(dParam);
-       if (decoded && decoded.name) {
-         initialClient = decoded;
-         // Cache on the mobile device if not already present
-         if (decoded.id && !storedClients.some((c) => c.id === decoded.id)) {
-           try {
-             const updatedStored = [decoded, ...storedClients];
-             localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
-           } catch {}
-         }
-       }
-     }
-
-    // 2. If idParam is provided, check storedClients or default clients
-    if (idParam) {
+    // 1. Priority 1: Direct parameters from scanned QR code (exact filled client name & phone number)
+    if (nameParam || phoneParam) {
+      initialClient = {
+        id: idParam || `scanned_${Date.now()}`,
+        name: nameParam || initialClient.name,
+        phone: formatWhatsAppPhone(phoneParam || ''),
+        city: cityParam || '',
+        category: (catParam as IndustryKey) || 'healthcare',
+        person_name: pnParam || undefined,
+        google_url: gParam || 'https://search.google.com',
+        default_lang: (langParam as LanguageCode) || 'gu',
+        keywords: kParam || '',
+        start_date: sdParam || undefined,
+        expiry_date: edParam || undefined,
+        createdAt: new Date().toISOString(),
+      };
+      // Cache this client on the scanning device immediately
+      if (initialClient.id && !storedClients.some((c) => c.id === initialClient.id)) {
+        try {
+          const updatedStored = [initialClient, ...storedClients];
+          localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
+        } catch {}
+      }
+    } else if (dParam) {
+      // 2. Priority 2: Decoded legacy parameter
+      const decoded = decodeClientData(dParam);
+      if (decoded && decoded.name) {
+        initialClient = decoded;
+      }
+    } else if (idParam) {
+      // 3. Priority 3: Local match
       const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
       if (match) initialClient = match;
-    } else if (!dParam && storedClients.length > 0) {
+    } else if (storedClients.length > 0) {
       initialClient = storedClients[0];
     }
 
@@ -101,7 +127,7 @@ function ReviewFunnelContent() {
       setLang(initialClient.default_lang);
     }
 
-    // Unconditionally fetch latest live client data from /api/clients to guarantee fresh validity date across phones & devices
+    // Live sync with /api/clients for lock reviews and dates, BUT protect query params from being overwritten!
     const targetId = idParam || initialClient.id;
     if (targetId) {
       // Fetch 24-hour locked reviews for this client across all users & phones
@@ -115,8 +141,24 @@ function ReviewFunnelContent() {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success && data.client) {
-            setClient(data.client);
-            if (data.client.default_lang) {
+            setClient((prev) => {
+              // If query parameters explicitly specified name or phone, NEVER overwrite them with default server data!
+              if (nameParam || phoneParam) {
+                return {
+                  ...data.client,
+                  name: nameParam || prev.name,
+                  phone: phoneParam ? formatWhatsAppPhone(phoneParam) : prev.phone,
+                  city: cityParam || prev.city || data.client.city,
+                  category: (catParam as IndustryKey) || prev.category || data.client.category,
+                  person_name: pnParam || prev.person_name || data.client.person_name,
+                  keywords: kParam || prev.keywords || data.client.keywords,
+                  google_url: gParam || prev.google_url || data.client.google_url,
+                  default_lang: (langParam as LanguageCode) || prev.default_lang || data.client.default_lang,
+                };
+              }
+              return data.client;
+            });
+            if (data.client.default_lang && !langParam) {
               setLang(data.client.default_lang);
             }
           }

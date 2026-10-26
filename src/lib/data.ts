@@ -996,6 +996,41 @@ export function formatWhatsAppPhone(phone?: string, fallback: string = '91987654
   return cleaned || fallback.replace(/\D/g, '') || '919876543210';
 }
 
+export function buildClientReviewUrl(baseUrl: string, client?: Partial<Client> | null): string {
+  if (!client) return `${baseUrl.replace(/\/$/, '')}/review`;
+  const cleanBase = baseUrl.replace(/\/$/, '');
+  const params = new URLSearchParams();
+  if (client.id) params.set('id', client.id);
+  if (client.name) params.set('name', client.name.trim());
+  if (client.phone) params.set('phone', formatWhatsAppPhone(client.phone));
+  if (client.city) params.set('city', client.city.trim());
+  if (client.category) params.set('cat', client.category);
+  if (client.person_name) params.set('pn', client.person_name.trim());
+  if (client.default_lang) params.set('lang', client.default_lang);
+  if (client.google_url) params.set('g', client.google_url.trim());
+  if (client.keywords) params.set('k', client.keywords.trim());
+  if (client.start_date) params.set('sd', client.start_date);
+  if (client.expiry_date) params.set('ed', client.expiry_date);
+  return `${cleanBase}/review?${params.toString()}`;
+}
+
+export function buildClientStandeeUrl(baseUrl: string, client?: Partial<Client> | null): string {
+  if (!client) return `${baseUrl.replace(/\/$/, '')}/standee`;
+  const cleanBase = baseUrl.replace(/\/$/, '');
+  const params = new URLSearchParams();
+  if (client.id) params.set('id', client.id);
+  if (client.name) params.set('name', client.name.trim());
+  if (client.phone) params.set('phone', formatWhatsAppPhone(client.phone));
+  if (client.city) params.set('city', client.city.trim());
+  if (client.category) params.set('cat', client.category);
+  if (client.person_name) params.set('pn', client.person_name.trim());
+  if (client.default_lang) params.set('lang', client.default_lang);
+  if (client.keywords) params.set('k', client.keywords.trim());
+  if (client.start_date) params.set('sd', client.start_date);
+  if (client.expiry_date) params.set('ed', client.expiry_date);
+  return `${cleanBase}/standee?${params.toString()}`;
+}
+
 export function encodeClientData(client: Partial<Client>): string {
   try {
     const jsonStr = JSON.stringify(client);

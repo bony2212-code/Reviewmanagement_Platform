@@ -35,6 +35,8 @@ import {
 import { Client, Lead, IndustryKey } from '../../lib/types';
 import {
   INDUSTRY_CATALOG,
+  buildClientReviewUrl,
+  buildClientStandeeUrl,
   encodeClientData,
   isClientExpired,
   isClientUpcoming,
@@ -109,14 +111,23 @@ export default function SmartXCRMAdminPortalPage() {
     const authStatus = isUserAuthenticated();
     setIsAuthenticated(authStatus);
     if (authStatus) {
-      setClients(getStoredClients());
+      const localClients = getStoredClients();
+      setClients(localClients);
       setLeads(getStoredLeads());
       fetch('/api/clients')
         .then((res) => res.json())
         .then((data) => {
-          if (data && data.success && Array.isArray(data.clients) && data.clients.length > 0) {
-            setClients(data.clients);
-            saveStoredClients(data.clients);
+          if (data && data.success && Array.isArray(data.clients)) {
+            // Intelligently merge: Preserve any locally created/edited clients so they never get wiped out
+            const merged = [...localClients];
+            data.clients.forEach((sc: Client) => {
+              const idx = merged.findIndex((lc) => lc.id === sc.id);
+              if (idx < 0) {
+                merged.push(sc);
+              }
+            });
+            setClients(merged);
+            saveStoredClients(merged);
           }
         })
         .catch(() => { });
@@ -158,6 +169,14 @@ export default function SmartXCRMAdminPortalPage() {
     }
     setClients(updated);
     saveStoredClients(updated);
+
+    // Explicitly sync this client directly to the server
+    fetch('/api/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(clientData),
+    }).catch(() => {});
+
     setIsClientModalOpen(false);
     setEditingClient(null);
   };
@@ -787,7 +806,7 @@ export default function SmartXCRMAdminPortalPage() {
 
                     {/* Live Funnel */}
                     <Link
-                      href={`/review?id=${client.id}&d=${encoded}`}
+                      href={buildClientReviewUrl('', client)}
                       target="_blank"
                       className="py-2 px-1 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-[11px] font-bold transition flex flex-col items-center justify-center gap-1 text-center"
                       title="Open Live Funnel"
@@ -798,7 +817,7 @@ export default function SmartXCRMAdminPortalPage() {
 
                     {/* Standee Print */}
                     <Link
-                      href={`/standee?id=${client.id}&d=${encoded}`}
+                      href={buildClientStandeeUrl('', client)}
                       target="_blank"
                       className="py-2 px-1 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 text-[11px] font-semibold transition flex flex-col items-center justify-center gap-1 text-center"
                       title="Print Standee Card"

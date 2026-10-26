@@ -218,14 +218,31 @@ function updateStats() {
 
 function getFunnelUrl(client) {
   const base = window.location.origin + window.location.pathname.replace('index.html', '').replace(/\/$/, '') + '/review.html';
-  const encoded = encodeClientData(client);
-  return `${base}?d=${encoded}`;
+  const p = new URLSearchParams();
+  if (client.id) p.set('id', client.id);
+  if (client.name) p.set('name', client.name);
+  if (client.phone) p.set('phone', client.phone);
+  if (client.city) p.set('city', client.city);
+  if (client.category) p.set('category', client.category);
+  if (client.person_name) p.set('person_name', client.person_name);
+  if (client.google_url) p.set('google_url', client.google_url);
+  if (client.keywords) p.set('keywords', client.keywords);
+  if (client.default_lang) p.set('lang', client.default_lang);
+  return `${base}?${p.toString()}`;
 }
 
 function getStandeeUrl(client) {
   const base = window.location.origin + window.location.pathname.replace('index.html', '').replace(/\/$/, '') + '/standee.html';
-  const encoded = encodeClientData(client);
-  return `${base}?d=${encoded}`;
+  const p = new URLSearchParams();
+  if (client.id) p.set('id', client.id);
+  if (client.name) p.set('name', client.name);
+  if (client.phone) p.set('phone', client.phone);
+  if (client.city) p.set('city', client.city);
+  if (client.category) p.set('category', client.category);
+  if (client.person_name) p.set('person_name', client.person_name);
+  if (client.google_url) p.set('google_url', client.google_url);
+  if (client.keywords) p.set('keywords', client.keywords);
+  return `${base}?${p.toString()}`;
 }
 
 // Populate Industry Dropdown in Add Client Modal
@@ -454,7 +471,14 @@ function shareOnWhatsApp(clientId) {
   const funnelUrl = getFunnelUrl(client);
   const text = `Hi! Please share your valuable experience with *${client.name}* on Google.\n\n👉 Tap here to rate us: ${funnelUrl}\n\n(It takes just 10 seconds and lets you choose English, Hindi, or Gujarati review drafts for your exact product/service!) ⭐⭐⭐⭐⭐`;
 
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  let cleanPhone = client.phone ? client.phone.replace(/\D/g, '') : '';
+  if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.substring(2);
+  else if (cleanPhone.startsWith('0') && cleanPhone.length === 11) cleanPhone = cleanPhone.substring(1);
+  if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
+
+  const waUrl = cleanPhone
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`
+    : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -563,7 +587,7 @@ function openQrModal(clientId) {
       height: 220,
       colorDark: "#1e1b4b",
       colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
+      correctLevel: QRCode.CorrectLevel.M
     });
   }
 
