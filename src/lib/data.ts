@@ -1121,8 +1121,8 @@ export function getDefaultExpiryDate(monthsToAdd: number = 3): string {
 export const DEFAULT_CLIENTS: Client[] = [
   {
     id: 'client_1',
-    name: 'smartxcrmcrm Surgical & Hospital Equipment',
-    person_name: 'Mr. Rajesh Shah (Director)',
+    name: 'SmartXCRM Surgical & Hospital Equipment',
+    person_name: 'Mr. Darpan Patel (Director)',
     category: 'surgical_medical',
     city: 'Ahmedabad',
     google_url: 'https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4',

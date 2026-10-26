@@ -7,8 +7,8 @@ const AUTH_SESSION_KEY = 'rgh_admin_session_v1';
 const DEFAULT_CLIENTS = [
   {
     id: 'client_1',
-    name: 'smartxcrmcrm Surgical & Hospital Equipment',
-    person_name: 'Mr. Rajesh Shah (Director)',
+    name: 'SmartXCRM Surgical & Hospital Equipment',
+    person_name: 'Mr. Darpan Patel (Director)',
     category: 'surgical_medical',
     city: 'Ahmedabad',
     google_url: 'https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4',

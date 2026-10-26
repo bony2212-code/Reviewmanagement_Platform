@@ -162,7 +162,7 @@ export default function ClientModal({ isOpen, client, onClose, onSave }: ClientM
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. smartxcrmcrm Hospital & Healthcare"
+                  placeholder="e.g. SmartXCRM Hospital & Healthcare"
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>

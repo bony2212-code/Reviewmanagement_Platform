@@ -63,7 +63,7 @@ import ApplyLeadModal from '../../components/ApplyLeadModal';
 import SettingsModal from '../../components/SettingsModal';
 import Toast from '../../components/Toast';
 
-export default function smartxcrmAdminPortalPage() {
+export default function SmartXCRMAdminPortalPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
 
@@ -133,14 +133,14 @@ export default function smartxcrmAdminPortalPage() {
       setIsAuthenticated(true);
       setClients(getStoredClients());
       setLeads(getStoredLeads());
-      showToast('Welcome back to smartxcrm_admin!');
+      showToast('Welcome back to SmartXCRM_admin!');
     } else {
       setLoginError('Invalid Login ID or Password. Please try again.');
     }
   };
 
   const handleLogout = () => {
-    if (confirm('Are you sure you want to log out of smartxcrm_admin?')) {
+    if (confirm('Are you sure you want to log out of SmartXCRM_admin?')) {
       clearSessionAuth();
       setIsAuthenticated(false);
       showToast('Logged out successfully.', 'info');
@@ -230,14 +230,14 @@ export default function smartxcrmAdminPortalPage() {
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium">Verifying smartxcrm_admin...</span>
+          <span className="text-sm font-medium">Verifying SmartXCRM_admin...</span>
         </div>
       </div>
     );
   }
 
   // ==========================================
-  // SECRET smartxcrmcrm_admin LOGIN SCREEN
+  // SECRET SmartXCRM_admin LOGIN SCREEN
   // ==========================================
   if (!isAuthenticated) {
     return (
@@ -256,10 +256,10 @@ export default function smartxcrmAdminPortalPage() {
               <Star className="w-7 h-7 fill-white text-white" />
             </div>
             <div className="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest mb-2">
-              smartxcrm_admin
+              SmartXCRM_admin
             </div>
             <h1 className="text-2xl font-black text-white tracking-tight">
-              smartxcrm_admin
+              SmartXCRM_admin
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Review Growth Hub • Authorized personnel only. Enter credentials to manage review campaigns.
@@ -333,7 +333,7 @@ export default function smartxcrmAdminPortalPage() {
               type="submit"
               className="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 active:scale-95 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Sign In to smartxcrm_admin</span>
+              <span>Sign In to SmartXCRM_admin</span>
             </button>
           </form>
 
@@ -354,7 +354,7 @@ export default function smartxcrmAdminPortalPage() {
   }
 
   // ==========================================
-  // AUTHENTICATED smartxcrm_admin DASHBOARD
+  // AUTHENTICATED SmartXCRM_admin DASHBOARD
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
@@ -371,7 +371,7 @@ export default function smartxcrmAdminPortalPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-extrabold text-white tracking-tight">
-                  smartxcrm_admin
+                  SmartXCRM_admin
                 </h1>
                 <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase tracking-wider">
                   Admin Portal

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fallback to explicit query params
   if (!clientData) {
     clientData = {
-      name: params.get('name') || "smartxcrmcrm Surgical & Mobility Store",
+      name: params.get('name') || "SmartXCRM Surgical & Mobility Store",
       city: params.get('city') || "Ahmedabad",
       category: params.get('category') || "surgical_medical",
       google_url: params.get('google_url') || "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",

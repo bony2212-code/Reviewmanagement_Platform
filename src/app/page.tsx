@@ -49,8 +49,8 @@ export default function PublicLandingPage() {
   React.useEffect(() => {
     const revs = generateReviews(
       {
-        name: 'smartxcrmcrm Care Hospital',
-        person_name: 'Dr. Rajesh Shah',
+        name: 'SmartXCRM ',
+        person_name: 'Dr. Darpan Patel',
         category: demoCategory,
         city: 'Ahmedabad',
       },
@@ -89,7 +89,7 @@ export default function PublicLandingPage() {
       <div className="bg-gradient-to-r from-indigo-900 via-indigo-700 to-blue-800 text-white text-xs font-semibold py-2 px-4 text-center border-b border-indigo-500/20">
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-          <span>Next-Gen smartxcrm 5-Star Review Engine • Supports English, हिन्दी & ગુજરાતી with Permanent QR Codes</span>
+          <span>Next-Gen SmartXCRM 5-Star Review Engine • Supports English, हिन्दी & ગુજરાતી with Permanent QR Codes</span>
         </span>
       </div>
 
@@ -107,7 +107,7 @@ export default function PublicLandingPage() {
                   Review Growth Hub
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest hidden sm:inline-block">
-                  smartxcrm
+                  SmartXCRM
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
@@ -254,8 +254,8 @@ export default function PublicLandingPage() {
                   🏥
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white">smartxcrmcrm Care Hospital & Multi-Speciality</h3>
-                  <p className="text-[11px] text-slate-400">Dr. Rajesh Shah • Ahmedabad</p>
+                  <h3 className="text-base font-extrabold text-white">SmartXCRM</h3>
+                  <p className="text-[11px] text-slate-400">Dr. Darpan Patel • Ahmedabad</p>
                 </div>
               </div>
 
@@ -526,8 +526,8 @@ export default function PublicLandingPage() {
                 <span>Google Reviews</span>
               </div>
 
-              <h4 className="text-xl font-black text-slate-900">smartxcrmcrm Care Hospital</h4>
-              <p className="text-xs font-semibold text-slate-600">Dr. Rajesh Shah • Ahmedabad</p>
+              <h4 className="text-xl font-black text-slate-900">SmartXCRM </h4>
+              <p className="text-xs font-semibold text-slate-600">Dr. Darpan Patel • Ahmedabad</p>
 
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
                 <p className="text-xs font-black text-slate-800">Loved your experience with us?</p>
@@ -585,7 +585,7 @@ export default function PublicLandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 fill-indigo-400 text-indigo-400" />
-            <span className="font-bold text-white">Review Growth Hub (smartxcrm)</span>
+            <span className="font-bold text-white">Review Growth Hub (SmartXCRM)</span>
             <span>• © 2026 All rights reserved.</span>
           </div>
 
