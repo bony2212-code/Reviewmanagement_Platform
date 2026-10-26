@@ -55,18 +55,18 @@ function StandeeContent() {
     if (!client || typeof window === 'undefined') return;
 
     const base = window.location.origin;
-    // Guaranteed standalone QR Code URL with permanent ID and full decoded payload
-    const funnelUrl = `${base}/review?id=${encodeURIComponent(client.id)}&d=${encodeClientData(client)}`;
+    // Clean permanent QR Code URL (crisp, large modules, instantly scannable by phone camera)
+    const funnelUrl = `${base}/review?id=${encodeURIComponent(client.id)}`;
 
     if (canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, funnelUrl, {
         width: 200,
-        margin: 1,
+        margin: 2,
         color: {
           dark: '#020617',
           light: '#ffffff',
         },
-        errorCorrectionLevel: 'H',
+        errorCorrectionLevel: 'M',
       });
     }
   }, [client]);

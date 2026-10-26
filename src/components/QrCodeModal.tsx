@@ -30,8 +30,8 @@ export default function QrCodeModal({ isOpen, client, onClose }: QrCodeModalProp
 
     if (typeof window !== 'undefined') {
       const base = window.location.origin;
-      // Complete QR Code URL with permanent ID and self-contained encoded payload
-      const url = `${base}/review?id=${encodeURIComponent(client.id)}&d=${encodeClientData(client)}`;
+      // Clean permanent QR Code URL (fast, sharp & instantly scannable by all phone cameras)
+      const url = `${base}/review?id=${encodeURIComponent(client.id)}`;
       setFunnelUrl(url);
 
       if (canvasRef.current) {
@@ -42,7 +42,7 @@ export default function QrCodeModal({ isOpen, client, onClose }: QrCodeModalProp
             dark: '#020617',
             light: '#ffffff',
           },
-          errorCorrectionLevel: 'H',
+          errorCorrectionLevel: 'M',
         });
       }
     }
