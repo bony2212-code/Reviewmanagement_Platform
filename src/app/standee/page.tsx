@@ -9,6 +9,7 @@ import { Client } from '../../lib/types';
 import {
   decodeClientData,
   DEFAULT_CLIENTS,
+  buildClientReviewUrl,
   formatWhatsAppPhone,
   formatDateRange
 } from '../../lib/data';
@@ -17,7 +18,46 @@ import { getStoredClients } from '../../lib/storage';
 function StandeeContent() {
   const searchParams = useSearchParams();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [client, setClient] = useState<Client>(DEFAULT_CLIENTS[0]);
+  const [client, setClient] = useState<Client>(() => {
+    const nameParam = searchParams.get('name') || searchParams.get('n');
+    const phoneParam = searchParams.get('phone') || searchParams.get('p');
+    const cityParam = searchParams.get('city') || searchParams.get('c');
+    const catParam = searchParams.get('cat') || searchParams.get('category');
+    const pnParam = searchParams.get('pn') || searchParams.get('person_name');
+    const langParam = searchParams.get('lang') || searchParams.get('l');
+    const gParam = searchParams.get('g') || searchParams.get('google_url');
+    const kParam = searchParams.get('k') || searchParams.get('keywords');
+    const sdParam = searchParams.get('sd') || searchParams.get('start_date');
+    const edParam = searchParams.get('ed') || searchParams.get('expiry_date');
+    const idParam = searchParams.get('id');
+    const dParam = searchParams.get('d');
+
+    if (nameParam) {
+      return {
+        id: idParam || `standee_${Date.now()}`,
+        name: nameParam.trim(),
+        phone: formatWhatsAppPhone(phoneParam || ''),
+        city: cityParam ? cityParam.trim() : '',
+        category: (catParam as any) || 'healthcare',
+        person_name: pnParam ? pnParam.trim() : undefined,
+        google_url: gParam ? gParam.trim() : DEFAULT_CLIENTS[0].google_url,
+        default_lang: (langParam as any) || 'gu',
+        keywords: kParam ? kParam.trim() : '',
+        start_date: sdParam || undefined,
+        expiry_date: edParam || undefined,
+        createdAt: new Date().toISOString(),
+      };
+    }
+    if (dParam) {
+      const decoded = decodeClientData(dParam);
+      if (decoded && decoded.name) return decoded;
+    }
+    if (idParam) {
+      const match = DEFAULT_CLIENTS.find((c) => c.id === idParam);
+      if (match) return match;
+    }
+    return DEFAULT_CLIENTS[0];
+  });
 
   useEffect(() => {
     const dParam = searchParams.get('d');
@@ -36,18 +76,18 @@ function StandeeContent() {
     const storedClients = getStoredClients();
     let initialClient = DEFAULT_CLIENTS[0];
 
-    // 1. Direct query parameters (from admin share/test link)
-    if (nameParam || phoneParam) {
+    // 1. Direct query parameters (from admin share/test link or QR scan)
+    if (nameParam) {
       initialClient = {
         id: idParam || `standee_${Date.now()}`,
-        name: nameParam || initialClient.name,
+        name: nameParam.trim(),
         phone: formatWhatsAppPhone(phoneParam || ''),
-        city: cityParam || '',
+        city: cityParam ? cityParam.trim() : '',
         category: (catParam as any) || 'healthcare',
-        person_name: pnParam || undefined,
-        google_url: gParam || 'https://search.google.com',
+        person_name: pnParam ? pnParam.trim() : undefined,
+        google_url: gParam ? gParam.trim() : DEFAULT_CLIENTS[0].google_url,
         default_lang: (langParam as any) || 'gu',
-        keywords: kParam || '',
+        keywords: kParam ? kParam.trim() : '',
         start_date: sdParam || undefined,
         expiry_date: edParam || undefined,
         createdAt: new Date().toISOString(),
@@ -100,7 +140,7 @@ function StandeeContent() {
     if (!client || typeof window === 'undefined') return;
 
     const base = window.location.origin;
-    const funnelUrl = `${base}/review?id=${encodeURIComponent(client.id)}`;
+    const funnelUrl = buildClientReviewUrl(base, client);
 
     if (canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, funnelUrl, {

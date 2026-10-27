@@ -4,14 +4,14 @@
     "name": "SmartXCRM Surgical & Hospital Equipment",
     "person_name": "Mr. Darpan Patel (Director)",
     "category": "surgical_medical",
-    "city": "Ahmedabadf",
+    "city": "Ahmedabad",
     "google_url": "https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4",
     "phone": "919876543210",
-    "keywords": "Walker, Walker / Walking Stick, Pulse Oximeter",
+    "keywords": "Walker, Walker / Walking Stick",
     "default_lang": "gu",
-    "createdAt": "2026-10-26T09:47:41.250Z",
-    "start_date": "2026-09-25",
-    "expiry_date": "2026-10-02"
+    "createdAt": "2026-10-26T12:47:04.157Z",
+    "start_date": "2026-10-01",
+    "expiry_date": "2027-10-26"
   },
   {
     "id": "client_2",
@@ -23,7 +23,7 @@
     "phone": "919876543211",
     "keywords": "Emergency Care, Orthopedic Surgery, ICU Facility, Cashless Mediclaim",
     "default_lang": "gu",
-    "createdAt": "2026-10-26T09:47:41.251Z",
+    "createdAt": "2026-10-26T12:47:04.157Z",
     "start_date": "2026-10-15",
     "expiry_date": "2027-04-26"
   },
@@ -37,7 +37,7 @@
     "phone": "919876543212",
     "keywords": "Painless Root Canal, Teeth Cleaning, Dental Implants, Invisible Aligners",
     "default_lang": "hi",
-    "createdAt": "2026-10-26T09:47:41.251Z",
+    "createdAt": "2026-10-26T12:47:04.157Z",
     "start_date": "2026-10-20",
     "expiry_date": "2027-01-26"
   },
@@ -51,7 +51,7 @@
     "phone": "919876543213",
     "keywords": "Authentic Gujarati Thali, Family Dining, Fast Service, Delicious Desserts",
     "default_lang": "gu",
-    "createdAt": "2026-10-26T09:47:41.251Z",
+    "createdAt": "2026-10-26T12:47:04.157Z",
     "start_date": "2026-10-01",
     "expiry_date": "2027-06-26"
   },
@@ -65,7 +65,7 @@
     "phone": "919876543214",
     "keywords": "Panchakarma Therapy, Joint Pain Relief, Herbal Medicine, Stress Relief",
     "default_lang": "gu",
-    "createdAt": "2026-10-26T10:21:59.793Z",
+    "createdAt": "2026-10-26T12:47:04.157Z",
     "start_date": "2026-05-01",
     "expiry_date": "2026-09-15"
   },
@@ -79,7 +79,7 @@
     "phone": "919876543215",
     "keywords": "Personal Training, Crossfit, Weight Loss, Modern Equipment",
     "default_lang": "en",
-    "createdAt": "2026-10-26T10:21:59.793Z",
+    "createdAt": "2026-10-26T12:47:04.157Z",
     "start_date": "2026-12-01",
     "expiry_date": "2027-12-01"
   }

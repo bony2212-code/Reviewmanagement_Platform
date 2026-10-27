@@ -11,6 +11,7 @@ import {
   getDaysUntilStart,
   formatDate,
   formatDateRange,
+  buildClientReviewUrl,
 } from '../lib/data';
 
 interface QrCodeModalProps {
@@ -29,12 +30,12 @@ export default function QrCodeModal({ isOpen, client, onClose }: QrCodeModalProp
 
     if (typeof window !== 'undefined') {
       const base = window.location.origin;
-      const url = `${base}/review?id=${encodeURIComponent(client.id)}`;
+      const url = buildClientReviewUrl(base, client);
       setFunnelUrl(url);
 
       if (canvasRef.current) {
         QRCode.toCanvas(canvasRef.current, url, {
-          width: 280,
+          width: 300,
           margin: 2,
           color: {
             dark: '#020617',

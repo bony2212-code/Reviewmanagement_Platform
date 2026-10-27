@@ -48,8 +48,52 @@ import {
 function ReviewFunnelContent() {
   const searchParams = useSearchParams();
 
-  const [client, setClient] = useState<Client>(DEFAULT_CLIENTS[0]);
-  const [lang, setLang] = useState<LanguageCode>('gu');
+  const [client, setClient] = useState<Client>(() => {
+    const nameParam = searchParams.get('name') || searchParams.get('n');
+    const phoneParam = searchParams.get('phone') || searchParams.get('p');
+    const cityParam = searchParams.get('city') || searchParams.get('c');
+    const catParam = searchParams.get('cat') || searchParams.get('category');
+    const pnParam = searchParams.get('pn') || searchParams.get('person_name');
+    const langParam = searchParams.get('lang') || searchParams.get('l');
+    const gParam = searchParams.get('g') || searchParams.get('google_url');
+    const kParam = searchParams.get('k') || searchParams.get('keywords');
+    const sdParam = searchParams.get('sd') || searchParams.get('start_date');
+    const edParam = searchParams.get('ed') || searchParams.get('expiry_date');
+    const idParam = searchParams.get('id');
+    const dParam = searchParams.get('d');
+
+    if (nameParam) {
+      return {
+        id: idParam || `scanned_${Date.now()}`,
+        name: nameParam.trim(),
+        phone: formatWhatsAppPhone(phoneParam || ''),
+        city: cityParam ? cityParam.trim() : '',
+        category: (catParam as IndustryKey) || 'healthcare',
+        person_name: pnParam ? pnParam.trim() : undefined,
+        google_url: gParam ? gParam.trim() : DEFAULT_CLIENTS[0].google_url,
+        default_lang: (langParam as LanguageCode) || 'gu',
+        keywords: kParam ? kParam.trim() : '',
+        start_date: sdParam || undefined,
+        expiry_date: edParam || undefined,
+        createdAt: new Date().toISOString(),
+      };
+    }
+    if (dParam) {
+      const decoded = decodeClientData(dParam);
+      if (decoded && decoded.name) return decoded;
+    }
+    if (idParam) {
+      const match = DEFAULT_CLIENTS.find((c) => c.id === idParam);
+      if (match) return match;
+    }
+    return DEFAULT_CLIENTS[0];
+  });
+
+  const [lang, setLang] = useState<LanguageCode>(() => {
+    const langParam = (searchParams.get('lang') || searchParams.get('l')) as LanguageCode;
+    if (langParam === 'en' || langParam === 'hi' || langParam === 'gu') return langParam;
+    return client?.default_lang || 'gu';
+  });
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -85,31 +129,48 @@ function ReviewFunnelContent() {
     const storedClients = getStoredClients();
     let initialClient: Client = DEFAULT_CLIENTS[0];
 
-    // Priority 1: Match by client ID (from storedClients or DEFAULT_CLIENTS)
-    if (idParam) {
+    // Priority 1: When nameParam is present (scanned from QR code or shared link)
+    if (nameParam) {
+      initialClient = {
+        id: idParam || `scanned_${Date.now()}`,
+        name: nameParam.trim(),
+        phone: formatWhatsAppPhone(phoneParam || ''),
+        city: cityParam ? cityParam.trim() : '',
+        category: (catParam as IndustryKey) || 'healthcare',
+        person_name: pnParam ? pnParam.trim() : undefined,
+        google_url: gParam ? gParam.trim() : DEFAULT_CLIENTS[0].google_url,
+        default_lang: (langParam as LanguageCode) || 'gu',
+        keywords: kParam ? kParam.trim() : '',
+        start_date: sdParam || undefined,
+        expiry_date: edParam || undefined,
+        createdAt: new Date().toISOString(),
+      };
+      // Cache this client immediately on this device
+      if (initialClient.id && !storedClients.some((c) => c.id === initialClient.id)) {
+        try {
+          const updatedStored = [initialClient, ...storedClients];
+          localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
+        } catch {}
+      }
+    } else if (idParam) {
+      // Priority 2: Match by client ID from device storage or defaults
       const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
       if (match) initialClient = { ...match };
     } else if (dParam) {
-      // Priority 2: Decoded payload
+      // Priority 3: Decoded legacy payload
       const decoded = decodeClientData(dParam);
       if (decoded && decoded.name) {
         initialClient = decoded;
+        if (initialClient.id && !storedClients.some((c) => c.id === initialClient.id)) {
+          try {
+            const updatedStored = [initialClient, ...storedClients];
+            localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
+          } catch {}
+        }
       }
     } else if (storedClients.length > 0) {
       initialClient = storedClients[0];
     }
-
-    // Safely apply any explicit query parameter overrides
-    if (nameParam) initialClient.name = nameParam;
-    if (phoneParam) initialClient.phone = formatWhatsAppPhone(phoneParam);
-    if (cityParam) initialClient.city = cityParam;
-    if (catParam) initialClient.category = catParam as IndustryKey;
-    if (pnParam) initialClient.person_name = pnParam;
-    if (gParam) initialClient.google_url = gParam;
-    if (kParam) initialClient.keywords = kParam;
-    if (sdParam) initialClient.start_date = sdParam;
-    if (edParam) initialClient.expiry_date = edParam;
-    if (langParam) initialClient.default_lang = langParam as LanguageCode;
 
     setClient(initialClient);
     if (initialClient.default_lang) {
@@ -130,17 +191,24 @@ function ReviewFunnelContent() {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success && data.client) {
-            setClient((prev) => ({
-              ...data.client,
-              ...(nameParam ? { name: nameParam } : {}),
-              ...(phoneParam ? { phone: formatWhatsAppPhone(phoneParam) } : {}),
-              ...(cityParam ? { city: cityParam } : {}),
-              ...(catParam ? { category: catParam as IndustryKey } : {}),
-              ...(pnParam ? { person_name: pnParam } : {}),
-              ...(kParam ? { keywords: kParam } : {}),
-              ...(gParam ? { google_url: gParam } : {}),
-              ...(langParam ? { default_lang: langParam as LanguageCode } : {}),
-            }));
+            setClient((prev) => {
+              if (nameParam) {
+                return {
+                  ...data.client,
+                  name: nameParam.trim(),
+                  phone: phoneParam ? formatWhatsAppPhone(phoneParam) : prev.phone,
+                  city: cityParam ? cityParam.trim() : prev.city,
+                  category: (catParam as IndustryKey) || prev.category,
+                  person_name: pnParam ? pnParam.trim() : prev.person_name,
+                  keywords: kParam ? kParam.trim() : prev.keywords,
+                  google_url: gParam ? gParam.trim() : prev.google_url,
+                  start_date: sdParam || prev.start_date,
+                  expiry_date: edParam || prev.expiry_date,
+                  default_lang: (langParam as LanguageCode) || prev.default_lang,
+                };
+              }
+              return data.client;
+            });
             if (data.client.default_lang && !langParam) {
               setLang(data.client.default_lang);
             }
