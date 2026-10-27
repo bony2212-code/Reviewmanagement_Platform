@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const settingsFilePath = path.join(process.cwd(), 'src', 'data', 'settings.json');
+const tmpSettingsPath = path.join(os.tmpdir(), 'review_hub_settings.json');
 
 const DEFAULT_SETTINGS = {
   agencyPhone: '919876543210'
@@ -12,6 +14,14 @@ let memorySettings = { ...DEFAULT_SETTINGS };
 
 function readSettingsFromFile() {
   try {
+    if (fs.existsSync(tmpSettingsPath)) {
+      const data = fs.readFileSync(tmpSettingsPath, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (parsed && typeof parsed === 'object') {
+        memorySettings = { ...DEFAULT_SETTINGS, ...parsed };
+        return memorySettings;
+      }
+    }
     if (fs.existsSync(settingsFilePath)) {
       const data = fs.readFileSync(settingsFilePath, 'utf-8');
       const parsed = JSON.parse(data);
@@ -36,7 +46,12 @@ function writeSettingsToFile(settings: typeof DEFAULT_SETTINGS): boolean {
     fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2), 'utf-8');
     return true;
   } catch (err) {
-    console.error("Error writing settings.json:", err);
+    try {
+      fs.writeFileSync(tmpSettingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+      return true;
+    } catch (tmpErr) {
+      console.error("Error writing settings fallback:", tmpErr);
+    }
     return false;
   }
 }

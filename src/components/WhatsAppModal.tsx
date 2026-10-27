@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, MessageSquare, Copy, Check, Send } from 'lucide-react';
 import { Client } from '../lib/types';
-import { buildClientReviewUrl, buildClientStandeeUrl, formatWhatsAppPhone } from '../lib/data';
+import { buildClientReviewUrl, buildClientStandeeUrl, formatWhatsAppPhone, copyToClipboardSafe } from '../lib/data';
 import { getAgencyContactNumber } from '../lib/storage';
 
 interface WhatsAppModalProps {
@@ -40,7 +40,7 @@ export default function WhatsAppModal({ isOpen, client, onClose }: WhatsAppModal
   const messageText = `⭐ *5-STAR GOOGLE REVIEW FUNNEL IS READY!*\n\nHello *${client.name}* team! 👋\n\nYour customized multilingual Google Review funnel is now live. Customers can now submit 5-star authentic reviews in English, हिन्दी, or ગુજરાતી in under 10 seconds:\n\n🔗 *Customer Review Link:* ${funnelUrl}\n🖨️ *Table Tent / Counter Standee:* ${standeeUrl}\n\n🛡️ *Negative Review Protection Active:* Any 1-3 star rating will be safely sent directly to your WhatsApp (+${targetPhone}) without touching your Google rating!\n\n📞 *Agency Support & Renewals:* +${agencyPhone.replace(/\D/g, '')}\n\n_Generated via Review Growth Hub_`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(messageText);
+    copyToClipboardSafe(messageText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };

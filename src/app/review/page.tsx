@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import {
@@ -23,6 +23,7 @@ import {
   UI_STRINGS,
   generateReviews,
   pickReviewTemplates,
+  generateNegativeFeedback,
   renderReviewFromTemplate,
   formatGoogleReviewUrl,
   formatWhatsAppPhone,
@@ -32,7 +33,8 @@ import {
   isClientUpcoming,
   formatDate,
   formatExpiryDate,
-  getDaysUntilStart
+  getDaysUntilStart,
+  copyToClipboardSafe
 } from '../../lib/data';
 import ApplyLeadModal from '../../components/ApplyLeadModal';
 import {
@@ -228,28 +230,40 @@ function ReviewFunnelContent() {
       .catch(() => {});
   }, [searchParams]);
 
-  // Initialize / update active templates on initial load or language change
+  const prevLangRef = useRef(lang);
+
+  // Initialize / update active templates whenever client, lang, rating, or usedReviews changes
   useEffect(() => {
     if (!client) return;
-    const templates = pickReviewTemplates(lang, client, selectedProduct, usedReviews);
-    setActiveTemplates(templates);
-  }, [client?.id, lang]);
+    if (rating < 4) {
+      const negativeOpts = generateNegativeFeedback(client, lang, selectedProduct);
+      setGeneratedOptions(negativeOpts);
+      setSelectedReviewText(negativeOpts[0] || '');
+    } else {
+      const templates = pickReviewTemplates(lang, client, selectedProduct, usedReviews);
+      setActiveTemplates(templates);
+    }
+  }, [client?.id, client?.name, client?.category, lang, rating, selectedProduct]);
 
   // Render generatedOptions whenever templates, selectedProduct, client, or lang changes
   // When user selects a product chip/point, the same templates stay steady and only the keyword updates (no unwanted shuffle!)
   useEffect(() => {
-    if (!client || activeTemplates.length === 0) return;
+    if (!client || rating < 4 || activeTemplates.length === 0) return;
     const revs = activeTemplates.map((t) => renderReviewFromTemplate(t, client, lang, selectedProduct));
     setGeneratedOptions(revs);
     setSelectedReviewText((prev) => {
+      if (prevLangRef.current !== lang) {
+        prevLangRef.current = lang;
+        return revs[0] || '';
+      }
       if (!prev || revs.length === 0) return revs[0] || '';
       const matchedIdx = generatedOptions.indexOf(prev);
       if (matchedIdx >= 0 && revs[matchedIdx]) {
         return revs[matchedIdx];
       }
-      return prev;
+      return revs[0] || prev;
     });
-  }, [activeTemplates, selectedProduct, client, lang]);
+  }, [activeTemplates, selectedProduct, client, lang, rating]);
 
   const ui = UI_STRINGS[lang] || UI_STRINGS.en;
   const catInfo = client.category ? INDUSTRY_CATALOG[client.category] || INDUSTRY_CATALOG.general : INDUSTRY_CATALOG.general;
@@ -260,8 +274,14 @@ function ReviewFunnelContent() {
     : catInfo.defaultProducts.slice(0, 8);
 
   const handleShuffle = () => {
-    const freshTemplates = pickReviewTemplates(lang, client, selectedProduct, usedReviews);
-    setActiveTemplates(freshTemplates);
+    if (rating < 4) {
+      const freshNeg = generateNegativeFeedback(client, lang, selectedProduct);
+      setGeneratedOptions(freshNeg);
+      setSelectedReviewText(freshNeg[0] || '');
+    } else {
+      const freshTemplates = pickReviewTemplates(lang, client, selectedProduct, usedReviews);
+      setActiveTemplates(freshTemplates);
+    }
   };
 
   const handleCopyAndRedirect = () => {
@@ -274,14 +294,14 @@ function ReviewFunnelContent() {
       origin: { y: 0.6 },
     });
 
-    // Copy to clipboard
-    navigator.clipboard.writeText(selectedReviewText);
+    // Copy to clipboard with universal mobile fallback
+    copyToClipboardSafe(selectedReviewText);
     setCopiedToast(true);
     setShowRedirectModal(true);
 
     const targetUrl = formatGoogleReviewUrl(client.google_url);
 
-    // Open Google in new tab after 1.5 seconds so user reads step guide
+    // Open Google in new tab after 1.2 seconds so user reads step guide
     setTimeout(() => {
       window.open(targetUrl, '_blank');
     }, 1200);
@@ -304,8 +324,11 @@ function ReviewFunnelContent() {
   const handleSendToWhatsApp = () => {
     const targetPhone = formatWhatsAppPhone(client?.phone, agencyPhone);
     const cleanNote = selectedReviewText.trim() || 'No custom note provided';
+    const starIcons = '⭐'.repeat(rating);
 
-    const whatsappMsg = `⭐ *CUSTOMER REVIEW & FEEDBACK - ${client.name.toUpperCase()}*\n\n⭐ *Rating Given:* ${rating} / 5 Stars\n📍 *City:* ${client.city}\n🏷️ *Service:* ${selectedProduct || 'General'}\n\n📝 *Review / Feedback:*\n"${cleanNote}"\n\n--------------------------------------------\n_Sent directly to your WhatsApp via Review Growth Hub_`;
+    const whatsappMsg = rating >= 4
+      ? `⭐ *CUSTOMER REVIEW & FEEDBACK - ${client.name.toUpperCase()}*\n\n⭐ *Rating Given:* ${rating} / 5 Stars (${starIcons})\n📍 *City:* ${client.city}\n🏷️ *Service:* ${selectedProduct || 'General'}\n\n📝 *Review / Feedback:*\n"${cleanNote}"\n\n--------------------------------------------\n_Sent directly on WhatsApp via Review Growth Hub_`
+      : `⚠️ *PRIVATE CUSTOMER FEEDBACK & ALERT - ${client.name.toUpperCase()}*\n\n⭐ *Rating Given:* ${rating} / 5 Stars (${starIcons})\n📍 *City:* ${client.city}\n🏷️ *Service:* ${selectedProduct || 'General'}\n\n📝 *Customer Issue / Concern:*\n"${cleanNote}"\n\n--------------------------------------------\n_Private feedback sent directly to owner. Not posted on Google._`;
 
     window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
 
@@ -316,8 +339,13 @@ function ReviewFunnelContent() {
     }
 
     // After user clicks review, shuffle to fresh variations for next time
-    const freshTemplates = pickReviewTemplates(lang, client, selectedProduct, [...usedReviews, selectedReviewText]);
-    setActiveTemplates(freshTemplates);
+    if (rating < 4) {
+      const freshNeg = generateNegativeFeedback(client, lang, selectedProduct);
+      setGeneratedOptions(freshNeg);
+    } else {
+      const freshTemplates = pickReviewTemplates(lang, client, selectedProduct, [...usedReviews, selectedReviewText]);
+      setActiveTemplates(freshTemplates);
+    }
   };
 
   return (
@@ -567,7 +595,7 @@ function ReviewFunnelContent() {
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{ui.chooseReview}</span>
+              <span>{rating >= 4 ? ui.chooseReview : (lang === 'gu' ? 'તમારી મુશ્કેલી અથવા કારણ પસંદ કરો:' : lang === 'hi' ? 'अपनी समस्या या कारण चुनें:' : 'Select your concern or reason:')}</span>
             </label>
             <button
               type="button"

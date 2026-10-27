@@ -12,6 +12,7 @@ import {
   formatDate,
   formatDateRange,
   buildClientReviewUrl,
+  copyToClipboardSafe,
 } from '../lib/data';
 
 interface QrCodeModalProps {
@@ -51,7 +52,7 @@ export default function QrCodeModal({ isOpen, client, onClose }: QrCodeModalProp
 
   const handleCopy = () => {
     if (!funnelUrl) return;
-    navigator.clipboard.writeText(funnelUrl);
+    copyToClipboardSafe(funnelUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };

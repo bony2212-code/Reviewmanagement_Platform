@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const filePath = path.join(process.cwd(), 'src', 'data', 'used_reviews.json');
+const tmpReviewsPath = path.join(os.tmpdir(), 'review_hub_used_reviews.json');
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
 interface UsedReviewEntry {
@@ -21,8 +23,14 @@ function normalizeText(text: string): string {
 
 function readUsedReviewsFromFile(): UsedReviewEntry[] {
   try {
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, 'utf-8');
+    const activePath = fs.existsSync(tmpReviewsPath)
+      ? tmpReviewsPath
+      : fs.existsSync(filePath)
+      ? filePath
+      : null;
+
+    if (activePath) {
+      const data = fs.readFileSync(activePath, 'utf-8');
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed)) {
         const now = Date.now();
@@ -34,7 +42,7 @@ function readUsedReviewsFromFile(): UsedReviewEntry[] {
         // If purged some old entries, sync back to file
         if (active.length !== parsed.length) {
           try {
-            fs.writeFileSync(filePath, JSON.stringify(active, null, 2), 'utf-8');
+            fs.writeFileSync(activePath, JSON.stringify(active, null, 2), 'utf-8');
           } catch {}
         }
         return active;
@@ -56,7 +64,12 @@ function writeUsedReviewsToFile(entries: UsedReviewEntry[]): boolean {
     fs.writeFileSync(filePath, JSON.stringify(entries, null, 2), 'utf-8');
     return true;
   } catch (err) {
-    console.error('Error writing used_reviews.json:', err);
+    try {
+      fs.writeFileSync(tmpReviewsPath, JSON.stringify(entries, null, 2), 'utf-8');
+      return true;
+    } catch (tmpErr) {
+      console.error('Error writing used_reviews fallback:', tmpErr);
+    }
     return false;
   }
 }

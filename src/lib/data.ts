@@ -979,6 +979,38 @@ export function formatGoogleReviewUrl(inputUrlOrPlaceId: string): string {
   return cleanInput;
 }
 
+export async function copyToClipboardSafe(text: string): Promise<boolean> {
+  if (!text || typeof window === 'undefined') return false;
+
+  if (navigator?.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // fallback below
+    }
+  }
+
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.opacity = '0';
+    textArea.setAttribute('readonly', '');
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return successful;
+  } catch (err) {
+    console.warn('Fallback copy failed', err);
+    return false;
+  }
+}
+
 export function formatWhatsAppPhone(phone?: string, fallback: string = '919876543210'): string {
   if (!phone || !phone.trim()) {
     return fallback.replace(/\D/g, '') || '919876543210';
