@@ -44,7 +44,8 @@ import {
   getAgencyContactNumber,
   getUsedReviewsLocal,
   markReviewUsed,
-  fetchServerUsedReviews
+  fetchServerUsedReviews,
+  API_BASE_URL
 } from '../../lib/storage';
 
 function ReviewFunnelContent() {
@@ -147,13 +148,6 @@ function ReviewFunnelContent() {
         expiry_date: edParam || undefined,
         createdAt: new Date().toISOString(),
       };
-      // Cache this client immediately on this device
-      if (initialClient.id && !storedClients.some((c) => c.id === initialClient.id)) {
-        try {
-          const updatedStored = [initialClient, ...storedClients];
-          localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
-        } catch {}
-      }
     } else if (idParam) {
       // Priority 2: Match by client ID from device storage or defaults
       const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
@@ -163,12 +157,6 @@ function ReviewFunnelContent() {
       const decoded = decodeClientData(dParam);
       if (decoded && decoded.name) {
         initialClient = decoded;
-        if (initialClient.id && !storedClients.some((c) => c.id === initialClient.id)) {
-          try {
-            const updatedStored = [initialClient, ...storedClients];
-            localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
-          } catch {}
-        }
       }
     } else if (storedClients.length > 0) {
       initialClient = storedClients[0];
@@ -189,7 +177,7 @@ function ReviewFunnelContent() {
         }
       });
 
-      fetch(`/api/clients?id=${encodeURIComponent(targetId)}`)
+      fetch(`${API_BASE_URL}/api/clients?id=${encodeURIComponent(targetId)}`)
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success && data.client) {
@@ -220,7 +208,7 @@ function ReviewFunnelContent() {
     }
 
     // Unconditionally fetch latest agency support contact number from /api/settings
-    fetch('/api/settings')
+    fetch(`${API_BASE_URL}/api/settings`)
       .then((res) => res.json())
       .then((data) => {
         if (data && data.success && data.settings && data.settings.agencyPhone) {

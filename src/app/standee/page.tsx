@@ -13,7 +13,7 @@ import {
   formatWhatsAppPhone,
   formatDateRange
 } from '../../lib/data';
-import { getStoredClients } from '../../lib/storage';
+import { getStoredClients, API_BASE_URL } from '../../lib/storage';
 
 function StandeeContent() {
   const searchParams = useSearchParams();
@@ -110,7 +110,7 @@ function StandeeContent() {
 
     const targetId = idParam || initialClient.id;
     if (targetId) {
-      fetch(`/api/clients?id=${encodeURIComponent(targetId)}`)
+      fetch(`${API_BASE_URL}/api/clients?id=${encodeURIComponent(targetId)}`)
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success && data.client) {

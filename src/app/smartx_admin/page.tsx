@@ -58,6 +58,11 @@ import {
   setSessionAuthenticated,
   clearSessionAuth,
 } from '../../lib/storage';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { loginAdmin, logoutAdmin, checkAuthSession } from '../../slices/authSlice';
+import { fetchClients, saveClient, deleteClient, setClientsDirect } from '../../slices/clientsSlice';
+import { fetchLeads, addLead, removeLead } from '../../slices/leadsSlice';
+import { fetchSettings } from '../../slices/settingsSlice';
 import ClientModal from '../../components/ClientModal';
 import QrCodeModal from '../../components/QrCodeModal';
 import WhatsAppModal from '../../components/WhatsAppModal';
@@ -66,6 +71,11 @@ import SettingsModal from '../../components/SettingsModal';
 import Toast from '../../components/Toast';
 
 export default function SmartXCRMAdminPortalPage() {
+  const dispatch = useAppDispatch();
+  const reduxAuth = useAppSelector((state) => state.auth);
+  const reduxClients = useAppSelector((state) => state.clients.items);
+  const reduxLeads = useAppSelector((state) => state.leads.items);
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
 
@@ -108,99 +118,96 @@ export default function SmartXCRMAdminPortalPage() {
   };
 
   useEffect(() => {
-    const authStatus = isUserAuthenticated();
-    setIsAuthenticated(authStatus);
-    if (authStatus) {
-      const localClients = getStoredClients();
-      setClients(localClients);
-      setLeads(getStoredLeads());
-      fetch('/api/clients')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.success && Array.isArray(data.clients)) {
-            // Intelligently merge: Preserve any locally created/edited clients so they never get wiped out
-            const merged = [...localClients];
-            data.clients.forEach((sc: Client) => {
-              const idx = merged.findIndex((lc) => lc.id === sc.id);
-              if (idx < 0) {
-                merged.push(sc);
-              }
-            });
-            setClients(merged);
-            saveStoredClients(merged);
-          }
-        })
-        .catch(() => { });
-    }
-    setIsAuthChecking(false);
-  }, []);
+    // 1. Initial local state fallback
+    const localClients = getStoredClients();
+    setClients(localClients);
+    setLeads(getStoredLeads());
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+    // 2. Validate JWT session and fetch latest data
+    dispatch(checkAuthSession()).then((res) => {
+      if (checkAuthSession.fulfilled.match(res)) {
+        setIsAuthenticated(true);
+        dispatch(fetchClients());
+        dispatch(fetchLeads());
+        dispatch(fetchSettings());
+      } else {
+        const authed = isUserAuthenticated();
+        setIsAuthenticated(authed);
+        if (authed) {
+          dispatch(fetchClients());
+          dispatch(fetchLeads());
+          dispatch(fetchSettings());
+        }
+      }
+      setIsAuthChecking(false);
+    });
+  }, [dispatch]);
+
+  // Sync Redux clients to local view
+  useEffect(() => {
+    if (reduxClients && reduxClients.length > 0) {
+      setClients(reduxClients);
+    }
+  }, [reduxClients]);
+
+  // Sync Redux leads to local view
+  useEffect(() => {
+    if (reduxLeads && reduxLeads.length > 0) {
+      setLeads(reduxLeads);
+    }
+  }, [reduxLeads]);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const creds = getAdminCredentials();
-    if (loginUsername.trim() === creds.username && loginPassword === creds.password) {
-      setLoginError('');
-      setSessionAuthenticated(rememberMe);
+    setLoginError('');
+
+    const action = await dispatch(
+      loginAdmin({
+        creds: { username: loginUsername.trim(), password: loginPassword },
+        remember: rememberMe,
+      })
+    );
+
+    if (loginAdmin.fulfilled.match(action)) {
       setIsAuthenticated(true);
-      setClients(getStoredClients());
-      setLeads(getStoredLeads());
+      dispatch(fetchClients());
+      dispatch(fetchLeads());
+      dispatch(fetchSettings());
       showToast('Welcome back to SmartXCRM_admin!');
     } else {
-      setLoginError('Invalid Login ID or Password. Please try again.');
+      setLoginError((action.payload as string) || 'Invalid Login ID or Password. Please try again.');
     }
   };
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to log out of SmartXCRM_admin?')) {
-      clearSessionAuth();
+      dispatch(logoutAdmin());
       setIsAuthenticated(false);
       showToast('Logged out successfully.', 'info');
     }
   };
 
   const handleSaveClient = (clientData: Client) => {
-    let updated: Client[];
-    if (editingClient) {
-      updated = clients.map((c) => (c.id === clientData.id ? clientData : c));
-      showToast(`Updated "${clientData.name}" successfully!`);
-    } else {
-      updated = [clientData, ...clients];
-      showToast(`Created new funnel for "${clientData.name}"!`);
-    }
-    setClients(updated);
-    saveStoredClients(updated);
-
-    // Explicitly sync this client directly to the server
-    fetch('/api/clients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(clientData),
-    }).catch(() => {});
-
+    dispatch(saveClient(clientData));
+    showToast(editingClient ? `Updated "${clientData.name}" successfully!` : `Created new funnel for "${clientData.name}"!`);
     setIsClientModalOpen(false);
     setEditingClient(null);
   };
 
   const handleDeleteClient = (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      const updated = clients.filter((c) => c.id !== id);
-      setClients(updated);
-      saveStoredClients(updated);
+      dispatch(deleteClient(id));
       showToast(`Deleted client "${name}"`, 'info');
     }
   };
 
   const handleAddLead = (newLead: Lead) => {
-    const updated = [newLead, ...leads];
-    setLeads(updated);
-    saveStoredLeads(updated);
+    dispatch(addLead(newLead));
     showToast('Inquiry submitted successfully!');
   };
 
   const handleDeleteLead = (id: string) => {
-    const updated = leads.filter((l) => l.id !== id);
-    setLeads(updated);
-    saveStoredLeads(updated);
+    dispatch(removeLead(id));
     showToast('Inquiry removed');
   };
 
@@ -214,11 +221,8 @@ export default function SmartXCRMAdminPortalPage() {
     const d = String(baseDate.getDate()).padStart(2, '0');
     const newExpiry = `${y}-${m}-${d}`;
 
-    const updated = clients.map((c) =>
-      c.id === client.id ? { ...c, expiry_date: newExpiry } : c
-    );
-    setClients(updated);
-    saveStoredClients(updated);
+    const updatedClient = { ...client, expiry_date: newExpiry };
+    dispatch(saveClient(updatedClient));
     showToast(`Extended "${client.name}" until ${formatExpiryDate(newExpiry)}!`);
   };
 

@@ -11,6 +11,9 @@ import {
   saveAgencyContactNumber
 } from '../lib/storage';
 import { DEFAULT_CLIENTS } from '../lib/data';
+import { settingsApi } from '../api/settingsApi';
+import { authApi } from '../api/authApi';
+import { clientsApi } from '../api/clientsApi';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -39,20 +42,17 @@ export default function SettingsModal({
   useEffect(() => {
     if (isOpen) {
       setAgencyPhone(getAgencyContactNumber());
-      fetch('/api/settings')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.success && data.settings && data.settings.agencyPhone) {
-            setAgencyPhone(data.settings.agencyPhone);
-          }
-        })
-        .catch(() => {});
+      settingsApi.fetchSettings().then((remote) => {
+        if (remote && remote.agencyPhone) {
+          setAgencyPhone(remote.agencyPhone);
+        }
+      }).catch(() => {});
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSaveAgencyPhone = (e: React.FormEvent) => {
+  const handleSaveAgencyPhone = async (e: React.FormEvent) => {
     e.preventDefault();
     const clean = agencyPhone.replace(/\D/g, '');
     if (!clean || clean.length < 10) {
@@ -60,12 +60,16 @@ export default function SettingsModal({
       return;
     }
     saveAgencyContactNumber(clean);
+    try {
+      await settingsApi.updateSettings({ agencyPhone: clean });
+    } catch {}
+
     setPhoneSaved(true);
     onShowToast(`Agency contact number set to +${clean}! All client renewal & query links updated.`, 'success');
     setTimeout(() => setPhoneSaved(false), 2500);
   };
 
-  const handleUpdatePassword = (e: React.FormEvent) => {
+  const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !newPassword) {
       onShowToast('Please fill in both username and password.', 'error');
@@ -81,6 +85,13 @@ export default function SettingsModal({
       password: newPassword,
     };
     saveAdminCredentials(newCreds);
+
+    try {
+      await authApi.changePassword(newPassword);
+    } catch (err: any) {
+      console.warn('Backend password update notice:', err);
+    }
+
     setSavedSuccess(true);
     onShowToast('Admin credentials updated successfully!', 'success');
     setTimeout(() => setSavedSuccess(false), 2000);
@@ -101,12 +112,13 @@ export default function SettingsModal({
     const fileReader = new FileReader();
     if (e.target.files && e.target.files[0]) {
       fileReader.readAsText(e.target.files[0], 'UTF-8');
-      fileReader.onload = (event) => {
+      fileReader.onload = async (event) => {
         try {
           const parsed = JSON.parse(event.target?.result as string);
           if (Array.isArray(parsed)) {
             saveStoredClients(parsed);
             onRefreshClients(parsed);
+            clientsApi.syncAllClients(parsed).catch(() => {});
             onShowToast(`Successfully imported ${parsed.length} clients!`, 'success');
           } else {
             onShowToast('Invalid JSON file format', 'error');

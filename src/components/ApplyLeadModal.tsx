@@ -5,6 +5,8 @@ import { X, Rocket, CheckCircle2, Building2, User, MapPin, Phone } from 'lucide-
 import { Lead } from '../lib/types';
 import { INDUSTRY_CATALOG } from '../lib/data';
 import { getAgencyContactNumber } from '../lib/storage';
+import { settingsApi } from '../api/settingsApi';
+import { leadsApi } from '../api/leadsApi';
 
 interface ApplyLeadModalProps {
   isOpen: boolean;
@@ -24,14 +26,11 @@ export default function ApplyLeadModal({ isOpen, onClose, onSubmitLead }: ApplyL
   useEffect(() => {
     if (isOpen) {
       setAgencyPhone(getAgencyContactNumber());
-      fetch('/api/settings')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.success && data.settings && data.settings.agencyPhone) {
-            setAgencyPhone(data.settings.agencyPhone);
-          }
-        })
-        .catch(() => {});
+      settingsApi.fetchSettings().then((data) => {
+        if (data && data.agencyPhone) {
+          setAgencyPhone(data.agencyPhone);
+        }
+      }).catch(() => {});
     }
   }, [isOpen]);
 
@@ -58,6 +57,7 @@ export default function ApplyLeadModal({ isOpen, onClose, onSubmitLead }: ApplyL
     };
 
     onSubmitLead(newLead);
+    leadsApi.submitLead(newLead).catch(() => {});
     setSubmitted(true);
 
     // Also compose inquiry WhatsApp link for agency using master configured number

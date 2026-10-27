@@ -28,6 +28,7 @@ import {
 import { IndustryKey, LanguageCode, Lead } from '../lib/types';
 import { INDUSTRY_CATALOG, UI_STRINGS, generateReviews } from '../lib/data';
 import { saveStoredLeads, getStoredLeads } from '../lib/storage';
+import { leadsApi } from '../api/leadsApi';
 import ApplyLeadModal from '../components/ApplyLeadModal';
 import Toast from '../components/Toast';
 
@@ -69,6 +70,7 @@ export default function PublicLandingPage() {
   const handleLeadSubmit = (lead: Lead) => {
     const existing = getStoredLeads();
     saveStoredLeads([lead, ...existing]);
+    leadsApi.submitLead(lead).catch(() => {});
     showToast(`Thank you ${lead.name}! Your inquiry for "${lead.business}" has been submitted.`);
   };
 

@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
+import StoreProvider from "../store/StoreProvider";
+
 export default function RootLayout({
   children,
 }: {
@@ -31,7 +33,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
-        {children}
+        <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
   );
