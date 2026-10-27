@@ -9,7 +9,6 @@ import { Client } from '../../lib/types';
 import {
   decodeClientData,
   DEFAULT_CLIENTS,
-  buildClientReviewUrl,
   formatWhatsAppPhone,
   formatDateRange
 } from '../../lib/data';
@@ -101,38 +100,18 @@ function StandeeContent() {
     if (!client || typeof window === 'undefined') return;
 
     const base = window.location.origin;
+    const funnelUrl = `${base}/review?id=${encodeURIComponent(client.id)}`;
 
-    const renderQrWithBase = (targetBase: string) => {
-      const funnelUrl = buildClientReviewUrl(targetBase, client);
-      if (canvasRef.current) {
-        QRCode.toCanvas(canvasRef.current, funnelUrl, {
-          width: 200,
-          margin: 2,
-          color: {
-            dark: '#020617',
-            light: '#ffffff',
-          },
-          errorCorrectionLevel: 'M',
-        });
-      }
-    };
-
-    // If on localhost, attempt to use network IP for phone camera scannability
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      fetch('/api/host-info')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.success && data.networkOrigin) {
-            renderQrWithBase(data.networkOrigin);
-          } else {
-            renderQrWithBase(base);
-          }
-        })
-        .catch(() => {
-          renderQrWithBase(base);
-        });
-    } else {
-      renderQrWithBase(base);
+    if (canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, funnelUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#020617',
+          light: '#ffffff',
+        },
+        errorCorrectionLevel: 'M',
+      });
     }
   }, [client]);
 
@@ -142,7 +121,7 @@ function StandeeContent() {
       {/* Top Action Bar (Hidden when printing) */}
       <div className="no-print max-w-sm w-full mb-4 flex items-center justify-between">
         <Link
-          href="/SmartXCRM_admin"
+          href="/smartxcrm_admin"
           className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition"
         >
           <ArrowLeft className="w-4 h-4" />

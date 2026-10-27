@@ -35,8 +35,6 @@ import {
 import { Client, Lead, IndustryKey } from '../../lib/types';
 import {
   INDUSTRY_CATALOG,
-  buildClientReviewUrl,
-  buildClientStandeeUrl,
   encodeClientData,
   isClientExpired,
   isClientUpcoming,
@@ -806,7 +804,7 @@ export default function SmartXCRMAdminPortalPage() {
 
                     {/* Live Funnel */}
                     <Link
-                      href={buildClientReviewUrl('', client)}
+                      href={`/review?id=${encodeURIComponent(client.id)}`}
                       target="_blank"
                       className="py-2 px-1 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-[11px] font-bold transition flex flex-col items-center justify-center gap-1 text-center"
                       title="Open Live Funnel"
@@ -817,7 +815,7 @@ export default function SmartXCRMAdminPortalPage() {
 
                     {/* Standee Print */}
                     <Link
-                      href={buildClientStandeeUrl('', client)}
+                      href={`/standee?id=${encodeURIComponent(client.id)}`}
                       target="_blank"
                       className="py-2 px-1 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 text-[11px] font-semibold transition flex flex-col items-center justify-center gap-1 text-center"
                       title="Print Standee Card"

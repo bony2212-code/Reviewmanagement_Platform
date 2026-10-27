@@ -85,49 +85,38 @@ function ReviewFunnelContent() {
     const storedClients = getStoredClients();
     let initialClient: Client = DEFAULT_CLIENTS[0];
 
-    // 1. Priority 1: Direct parameters from scanned QR code (exact filled client name & phone number)
-    if (nameParam || phoneParam) {
-      initialClient = {
-        id: idParam || `scanned_${Date.now()}`,
-        name: nameParam || initialClient.name,
-        phone: formatWhatsAppPhone(phoneParam || ''),
-        city: cityParam || '',
-        category: (catParam as IndustryKey) || 'healthcare',
-        person_name: pnParam || undefined,
-        google_url: gParam || 'https://search.google.com',
-        default_lang: (langParam as LanguageCode) || 'gu',
-        keywords: kParam || '',
-        start_date: sdParam || undefined,
-        expiry_date: edParam || undefined,
-        createdAt: new Date().toISOString(),
-      };
-      // Cache this client on the scanning device immediately
-      if (initialClient.id && !storedClients.some((c) => c.id === initialClient.id)) {
-        try {
-          const updatedStored = [initialClient, ...storedClients];
-          localStorage.setItem('review_growth_hub_clients_v3', JSON.stringify(updatedStored));
-        } catch {}
-      }
+    // Priority 1: Match by client ID (from storedClients or DEFAULT_CLIENTS)
+    if (idParam) {
+      const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
+      if (match) initialClient = { ...match };
     } else if (dParam) {
-      // 2. Priority 2: Decoded legacy parameter
+      // Priority 2: Decoded payload
       const decoded = decodeClientData(dParam);
       if (decoded && decoded.name) {
         initialClient = decoded;
       }
-    } else if (idParam) {
-      // 3. Priority 3: Local match
-      const match = storedClients.find((c) => c.id === idParam) || DEFAULT_CLIENTS.find((c) => c.id === idParam);
-      if (match) initialClient = match;
     } else if (storedClients.length > 0) {
       initialClient = storedClients[0];
     }
+
+    // Safely apply any explicit query parameter overrides
+    if (nameParam) initialClient.name = nameParam;
+    if (phoneParam) initialClient.phone = formatWhatsAppPhone(phoneParam);
+    if (cityParam) initialClient.city = cityParam;
+    if (catParam) initialClient.category = catParam as IndustryKey;
+    if (pnParam) initialClient.person_name = pnParam;
+    if (gParam) initialClient.google_url = gParam;
+    if (kParam) initialClient.keywords = kParam;
+    if (sdParam) initialClient.start_date = sdParam;
+    if (edParam) initialClient.expiry_date = edParam;
+    if (langParam) initialClient.default_lang = langParam as LanguageCode;
 
     setClient(initialClient);
     if (initialClient.default_lang) {
       setLang(initialClient.default_lang);
     }
 
-    // Live sync with /api/clients for lock reviews and dates, BUT protect query params from being overwritten!
+    // Live sync with /api/clients for lock reviews and dates
     const targetId = idParam || initialClient.id;
     if (targetId) {
       // Fetch 24-hour locked reviews for this client across all users & phones
@@ -141,23 +130,17 @@ function ReviewFunnelContent() {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.success && data.client) {
-            setClient((prev) => {
-              // If query parameters explicitly specified name or phone, NEVER overwrite them with default server data!
-              if (nameParam || phoneParam) {
-                return {
-                  ...data.client,
-                  name: nameParam || prev.name,
-                  phone: phoneParam ? formatWhatsAppPhone(phoneParam) : prev.phone,
-                  city: cityParam || prev.city || data.client.city,
-                  category: (catParam as IndustryKey) || prev.category || data.client.category,
-                  person_name: pnParam || prev.person_name || data.client.person_name,
-                  keywords: kParam || prev.keywords || data.client.keywords,
-                  google_url: gParam || prev.google_url || data.client.google_url,
-                  default_lang: (langParam as LanguageCode) || prev.default_lang || data.client.default_lang,
-                };
-              }
-              return data.client;
-            });
+            setClient((prev) => ({
+              ...data.client,
+              ...(nameParam ? { name: nameParam } : {}),
+              ...(phoneParam ? { phone: formatWhatsAppPhone(phoneParam) } : {}),
+              ...(cityParam ? { city: cityParam } : {}),
+              ...(catParam ? { category: catParam as IndustryKey } : {}),
+              ...(pnParam ? { person_name: pnParam } : {}),
+              ...(kParam ? { keywords: kParam } : {}),
+              ...(gParam ? { google_url: gParam } : {}),
+              ...(langParam ? { default_lang: langParam as LanguageCode } : {}),
+            }));
             if (data.client.default_lang && !langParam) {
               setLang(data.client.default_lang);
             }

@@ -1,32 +1,35 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { Client } from '../../../lib/types';
 import { DEFAULT_CLIENTS } from '../../../lib/data';
 
 const filePath = path.join(process.cwd(), 'src', 'data', 'clients.json');
+const tmpPath = path.join(os.tmpdir(), 'review_hub_clients.json');
 
 // In-memory fallback
 let memoryClients: Client[] = [...DEFAULT_CLIENTS];
 
 function readClientsFromFile(): Client[] {
   try {
+    if (fs.existsSync(tmpPath)) {
+      const data = fs.readFileSync(tmpPath, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryClients = parsed;
+        return parsed;
+      }
+    }
     if (fs.existsSync(filePath)) {
       const data = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        let changed = false;
         DEFAULT_CLIENTS.forEach((dc) => {
           if (!parsed.some((c: Client) => c.id === dc.id)) {
             parsed.push(dc);
-            changed = true;
           }
         });
-        if (changed) {
-          try {
-            fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2), 'utf-8');
-          } catch {}
-        }
         memoryClients = parsed;
         return parsed;
       }
@@ -38,8 +41,8 @@ function readClientsFromFile(): Client[] {
 }
 
 function writeClientsToFile(clients: Client[]): boolean {
+  memoryClients = clients;
   try {
-    memoryClients = clients;
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -47,7 +50,13 @@ function writeClientsToFile(clients: Client[]): boolean {
     fs.writeFileSync(filePath, JSON.stringify(clients, null, 2), 'utf-8');
     return true;
   } catch (err) {
-    console.error("Error writing clients.json:", err);
+    // Fallback for serverless read-only environments (e.g. Vercel)
+    try {
+      fs.writeFileSync(tmpPath, JSON.stringify(clients, null, 2), 'utf-8');
+      return true;
+    } catch (tmpErr) {
+      console.error("Error writing clients fallback:", tmpErr);
+    }
     return false;
   }
 }
